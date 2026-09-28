@@ -25,15 +25,24 @@ export const site = {
 // Fotos do slider principal da home, na ordem em que aparecem.
 // Formato: 'categoria/nome-do-arquivo' (sem o .jpg). Lista vazia = escolha automática.
 export const destaques: string[] = [
-  'rua/01-capa-mortal-no-barco',
-  'retrato/01-noite-em-roxo',
-  'paisagem/01-sol-sobre-a-baia',
+  'retrato/10-perfil-na-noite',
+  'retrato/09-wonder-why',
+  'rua/12-kit-de-praia',
+  'paisagem/06-ceu-amarelo-e-coqueiros',
+  'rua/07-escola-de-surf',
+  'retrato/07-amigos-no-mar',
+  'rua/08-buggy-e-bandeira',
+  'rua/11-bar-da-praia',
+  'rua/09-ambulante-na-areia',
   'rua/02-noite-de-festa',
-  'retrato/02-olhando-a-cidade',
-  'paisagem/02-barcos-na-hora-dourada',
+  'retrato/05-sorriso',
   'rua/03-luzes-da-praca',
-  'retrato/03-camisa-10',
+  'retrato/02-olhando-a-cidade',
+  'rua/06-bolsa-na-pedra',
+  'paisagem/05-barcos-no-azul',
   'paisagem/03-fim-de-tarde-nas-pedras',
+  'paisagem/04-navio-ao-entardecer',
+  'rua/01-capa-mortal-no-barco',
 ];
 
 // Divulgação: você também cria sites de portfólio para outras pessoas.
