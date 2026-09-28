@@ -16,8 +16,8 @@ export const site = {
   ],
   equipamento: ['Câmera: Nikon D3200'],
   contato: {
-    instagram: 'seu.usuario', // só o @, sem o "@"
-    whatsapp: '5500000000000', // DDI + DDD + número, só dígitos
+    instagram: '_avila.jf', // só o @, sem o "@"
+    whatsapp: '5582993327581', // DDI + DDD + número, só dígitos
     email: 'voce@exemplo.com',
   },
 };
