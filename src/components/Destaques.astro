@@ -1,6 +1,7 @@
 ---
-// Slider principal (inspirado no "T.RICKS Slider"): arrasta com o mouse ou o dedo,
-// roda em loop e deixa a foto do centro em destaque. Usa a biblioteca Splide.
+// Slider principal (inspirado no "T.RICKS Slider"): arrasta com o mouse ou o dedo, roda em loop
+// e tem o efeito de "tela curva": duas elipses da cor do fundo cortam o topo e a base das fotos,
+// deixando o meio mais baixo que as pontas. Usa a biblioteca Splide.
 import { Image } from 'astro:assets';
 import type { Foto } from '../lib/fotos';
 import { categorias } from '../data/site';
@@ -12,17 +13,23 @@ interface Props {
 
 const { fotos } = Astro.props;
 const tituloDa = (slug: string) => categorias.find((c) => c.slug === slug)?.titulo ?? slug;
+const doisDigitos = (n: number) => String(n).padStart(2, '0');
+const primeira = fotos[0];
 ---
 
 <section class="destaques" aria-label="Fotos em destaque">
-  <div class="splide" data-cursor="ARRASTE">
-    <div class="splide__track">
-      <ul class="splide__list">
-        {
-          fotos.map((foto, i) => (
-            <li class="splide__slide">
-              <a class="slide" href={url(`/${foto.categoria}`)} draggable="false">
-                <div class="slide-foto">
+  <div class="curva">
+    <div class="splide" data-cursor="ARRASTE">
+      <div class="splide__track">
+        <ul class="splide__list">
+          {
+            fotos.map((foto, i) => (
+              <li
+                class="splide__slide"
+                data-titulo={foto.alt}
+                data-categoria={tituloDa(foto.categoria)}
+              >
+                <a class="slide" href={url(`/${foto.categoria}`)} draggable="false">
                   <Image
                     src={foto.src}
                     alt={foto.alt}
@@ -33,28 +40,34 @@ const tituloDa = (slug: string) => categorias.find((c) => c.slug === slug)?.titu
                     loading={i < 4 ? 'eager' : 'lazy'}
                     draggable="false"
                   />
-                </div>
-                <div class="slide-legenda">
-                  <span class="slide-num">{String(i + 1).padStart(2, '0')}</span>
-                  <span class="slide-titulo">{foto.alt}</span>
-                  <span class="slide-categoria">{tituloDa(foto.categoria)}</span>
-                </div>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
     </div>
+    <!-- As duas "ondas" que curvam o slider (mude a altura em --curva no CSS) -->
+    <div class="onda onda-topo" aria-hidden="true"></div>
+    <div class="onda onda-base" aria-hidden="true"></div>
   </div>
 
-  <div class="controles container">
-    <button class="controle anterior" type="button" aria-label="Foto anterior">
-      <span class="controle-fundo"></span><span class="controle-seta">←</span>
-    </button>
-    <span class="contador"><b class="contador-atual">01</b> / {String(fotos.length).padStart(2, '0')}</span>
-    <button class="controle proxima" type="button" aria-label="Próxima foto">
-      <span class="controle-fundo"></span><span class="controle-seta">→</span>
-    </button>
+  <div class="rodape-slider container">
+    <p class="legenda" aria-live="polite">
+      <span class="legenda-num">{doisDigitos(1)}</span>
+      <span class="legenda-titulo">{primeira?.alt}</span>
+      <span class="legenda-categoria">{primeira && tituloDa(primeira.categoria)}</span>
+    </p>
+
+    <div class="controles">
+      <button class="controle anterior" type="button" aria-label="Foto anterior">
+        <span class="controle-fundo"></span><span class="controle-seta">←</span>
+      </button>
+      <span class="contador"><b class="contador-atual">01</b> / {doisDigitos(fotos.length)}</span>
+      <button class="controle proxima" type="button" aria-label="Próxima foto">
+        <span class="controle-fundo"></span><span class="controle-seta">→</span>
+      </button>
+    </div>
   </div>
 </section>
 
@@ -69,21 +82,36 @@ const tituloDa = (slug: string) => categorias.find((c) => c.slug === slug)?.titu
       perPage: 3,
       perMove: 1,
       focus: 'center',
-      gap: '2.2vw',
+      gap: '1.2vw',
       arrows: false,
       pagination: false,
       speed: 900,
       easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)',
       dragMinThreshold: { mouse: 8, touch: 12 },
       breakpoints: {
-        767: { perPage: 1, padding: '12%', gap: '4vw' },
+        767: { perPage: 1, padding: '14%', gap: '3vw' },
       },
     }).mount();
 
     const secao = raiz.closest('.destaques')!;
     const atual = secao.querySelector('.contador-atual')!;
+    const legenda = secao.querySelector<HTMLElement>('.legenda')!;
+    const num = legenda.querySelector('.legenda-num')!;
+    const titulo = legenda.querySelector('.legenda-titulo')!;
+    const categoria = legenda.querySelector('.legenda-categoria')!;
+
+    // Troca a legenda com uma pequena animação quando a foto do centro muda
     slider.on('move', (indice) => {
-      atual.textContent = String(indice + 1).padStart(2, '0');
+      const slide = slider.Components.Slides.getAt(indice)?.slide;
+      const n = String(indice + 1).padStart(2, '0');
+      atual.textContent = n;
+      legenda.classList.add('trocando');
+      setTimeout(() => {
+        num.textContent = n;
+        titulo.textContent = slide?.dataset.titulo ?? '';
+        categoria.textContent = slide?.dataset.categoria ?? '';
+        legenda.classList.remove('trocando');
+      }, 250);
     });
 
     secao.querySelector('.anterior')!.addEventListener('click', () => slider.go('<'));
@@ -97,6 +125,31 @@ const tituloDa = (slug: string) => categorias.find((c) => c.slug === slug)?.titu
     overflow: hidden;
   }
 
+  /* ---------- Efeito de tela curva ---------- */
+  .curva {
+    --curva: clamp(34px, 4.5vw, 70px); /* quanto maior, mais curvado */
+    position: relative;
+  }
+
+  .onda {
+    position: absolute;
+    left: -15%;
+    right: -15%;
+    height: calc(var(--curva) * 2);
+    background: var(--fundo);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .onda-topo {
+    top: calc(var(--curva) * -1);
+  }
+
+  .onda-base {
+    bottom: calc(var(--curva) * -1);
+  }
+
   .splide {
     cursor: grab;
   }
@@ -107,68 +160,68 @@ const tituloDa = (slug: string) => categorias.find((c) => c.slug === slug)?.titu
 
   .slide {
     display: block;
-    user-select: none;
-  }
-
-  .slide-foto {
     aspect-ratio: 4 / 5;
     overflow: hidden;
     background: var(--fundo-2);
+    user-select: none;
   }
 
-  .slide-foto img {
+  .slide img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     pointer-events: none;
-  }
-
-  /* Fotos das pontas ficam menores e apagadas; a do centro cresce */
-  .splide__slide .slide-foto {
-    transform: scale(0.84);
-    filter: grayscale(0.7) brightness(0.55);
+    filter: brightness(0.6) saturate(0.8);
+    transform: scale(1.08);
     transition:
-      transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1),
-      filter 0.9s;
+      filter 0.9s,
+      transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
-  .splide__slide.is-active .slide-foto {
-    transform: scale(1);
+  .splide__slide.is-active .slide img {
     filter: none;
-    box-shadow: 0 30px 80px rgb(0 0 0 / 0.6), 0 0 60px rgb(124 58 237 / 0.25);
+    transform: scale(1);
   }
 
-  .slide-legenda {
+  /* ---------- Legenda e controles ---------- */
+  .rodape-slider {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem 2rem;
+    margin-top: 1.5rem;
+  }
+
+  .legenda {
     display: flex;
     align-items: baseline;
     gap: 0.9rem;
-    margin-top: 1.1rem;
+    margin: 0;
+    transition:
+      opacity 0.25s,
+      translate 0.25s;
+  }
+
+  .legenda.trocando {
     opacity: 0;
-    translate: 0 12px;
-    transition: opacity 0.6s, translate 0.6s;
+    translate: 0 8px;
   }
 
-  /* .splide__slide na frente: o Splide também põe "is-active" no slider inteiro */
-  .splide__slide.is-active .slide-legenda {
-    opacity: 1;
-    translate: 0 0;
-  }
-
-  .slide-num {
+  .legenda-num {
     font-size: 0.72rem;
     letter-spacing: 0.2em;
     color: var(--destaque);
   }
 
-  .slide-titulo {
+  .legenda-titulo {
     font-family: var(--fonte-titulo);
     font-style: italic;
-    font-size: 1.5rem;
+    font-size: clamp(1.4rem, 2.4vw, 2rem);
     text-transform: lowercase;
   }
 
-  .slide-categoria {
-    margin-left: auto;
+  .legenda-categoria {
     font-size: 0.7rem;
     letter-spacing: 0.25em;
     text-transform: uppercase;
@@ -178,10 +231,8 @@ const tituloDa = (slug: string) => categorias.find((c) => c.slug === slug)?.titu
   /* Setas redondas que "enchem" de roxo no hover */
   .controles {
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: 1.6rem;
-    margin-top: 2.5rem;
+    gap: 1.4rem;
   }
 
   .controle {
@@ -241,9 +292,19 @@ const tituloDa = (slug: string) => categorias.find((c) => c.slug === slug)?.titu
     color: var(--texto);
   }
 
+  @media (max-width: 767px) {
+    .curva {
+      --curva: 34px;
+    }
+
+    .rodape-slider {
+      flex-direction: column;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .splide__slide .slide-foto,
-    .slide-legenda {
+    .slide img,
+    .legenda {
       transition: none;
     }
   }
