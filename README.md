@@ -39,7 +39,9 @@ src/assets/fotos/rua/
 
 - **Ordem:** comece o nome com um número: `01-...`, `02-...`
 - **Legenda:** o resto do nome vira a legenda: `03-neblina-na-serra.jpg` → "neblina na serra"
-- **Capa da home:** um arquivo com `capa` no nome, por exemplo `00-capa-por-do-sol.jpg`
+- **Capa da home:** defina `capaPrincipal` em `src/data/site.ts` (ex.: `'paisagem/01-sol-sobre-a-baia'`)
+- **Capa de cada categoria:** campo `capa` da categoria em `src/data/site.ts`
+- **Slider da home:** lista `destaques` em `src/data/site.ts`
 - **Foto da página Sobre:** `src/assets/eu.jpg`
 
 Dica: exporte do Lightroom com o lado maior em 2400 px e qualidade de ~85%.

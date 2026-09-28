@@ -22,6 +22,9 @@ export const site = {
   },
 };
 
+// Foto grande do topo da home. Formato: 'categoria/nome-do-arquivo' (sem o .jpg).
+export const capaPrincipal = 'paisagem/01-sol-sobre-a-baia';
+
 // Fotos do slider principal da home, na ordem em que aparecem.
 // Formato: 'categoria/nome-do-arquivo' (sem o .jpg). Lista vazia = escolha automática.
 export const destaques: string[] = [

@@ -1,5 +1,5 @@
 import type { ImageMetadata } from 'astro';
-import { categorias } from '../data/site';
+import { categorias, capaPrincipal } from '../data/site';
 
 // Lê automaticamente toda imagem dentro de src/assets/fotos/<categoria>/
 // Nome do arquivo vira a legenda: "03-por-do-sol-na-serra.jpg" -> "por do sol na serra"
@@ -61,10 +61,10 @@ export function fotosEmDestaque(lista: string[], limite = 10) {
     .filter((f): f is Foto => Boolean(f));
 }
 
-// Foto de capa: qualquer arquivo com nome começando em "capa", senão a primeira paisagem.
+// Foto de capa: a escolhida em site.ts (capaPrincipal), senão a primeira paisagem.
 export function capa() {
   return (
-    fotos.find((f) => f.nome.toLowerCase().includes('capa')) ??
+    fotos.find((f) => `${f.categoria}/${f.nome}` === capaPrincipal) ??
     fotosDa('paisagem')[0] ??
     fotos[0]
   );
