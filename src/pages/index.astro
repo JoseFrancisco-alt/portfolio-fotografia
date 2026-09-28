@@ -1,0 +1,242 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Galeria from '../components/Galeria.astro';
+import { site, categorias } from '../data/site';
+import { capa, fotosDa, selecionadas } from '../lib/fotos';
+import { url } from '../lib/url';
+
+const fotoCapa = capa();
+const ensaios = categorias.map((c) => ({ ...c, foto: fotosDa(c.slug)[0], total: fotosDa(c.slug).length }));
+---
+
+<Base>
+  <section class="hero">
+    {
+      fotoCapa ? (
+        <Image
+          class="hero-foto"
+          src={fotoCapa.src}
+          alt={fotoCapa.alt}
+          widths={[800, 1400, 2200]}
+          sizes="100vw"
+          format="webp"
+          quality={80}
+          loading="eager"
+          fetchpriority="high"
+        />
+      ) : (
+        <div class="hero-foto hero-vazio" />
+      )
+    }
+    <div class="hero-texto container">
+      <p class="rotulo">Fotografia · {site.cidade}</p>
+      <h1>{site.nome}</h1>
+      <p class="hero-sub">{categorias.map((c) => c.titulo).join(' · ')}</p>
+    </div>
+    <a class="rolar" href="#ensaios" aria-label="Ver ensaios">↓</a>
+  </section>
+
+  <section id="ensaios" class="container secao">
+    <p class="rotulo">Ensaios</p>
+    <div class="ensaios">
+      {
+        ensaios.map((ensaio, i) => (
+          <a class="ensaio revelar" href={url(`/${ensaio.slug}`)}>
+            <div class="ensaio-imagem">
+              {ensaio.foto ? (
+                <Image src={ensaio.foto.src} alt={ensaio.foto.alt} widths={[480, 800]} sizes="(max-width: 760px) 100vw, 33vw" format="webp" />
+              ) : (
+                <div class="ensaio-vazio" />
+              )}
+            </div>
+            <span class="ensaio-numero">0{i + 1}</span>
+            <h2>{ensaio.titulo}</h2>
+            <p>{ensaio.total > 0 ? `${ensaio.total} fotos` : 'em breve'}</p>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="container secao">
+    <p class="rotulo">Selecionadas</p>
+    <Galeria fotos={selecionadas()} />
+  </section>
+
+  <section class="container chamada revelar">
+    <h2>Vamos fotografar?</h2>
+    <p>Ensaios de retrato, trabalhos autorais e parcerias.</p>
+    <a class="botao" href={url('/contato')}>Entrar em contato</a>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    position: relative;
+    height: 100svh;
+    min-height: 520px;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .hero-foto {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    animation: zoom 18s ease-out both;
+  }
+
+  .hero-vazio {
+    background:
+      radial-gradient(ellipse at 70% 30%, #3b2466 0%, transparent 55%),
+      radial-gradient(ellipse at 20% 80%, #1a1633 0%, transparent 60%),
+      var(--fundo);
+  }
+
+  /* Vinheta cinematográfica */
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top, var(--fundo) 0%, transparent 45%),
+      radial-gradient(ellipse at center, transparent 50%, rgb(0 0 0 / 0.55) 100%);
+  }
+
+  .hero-texto {
+    position: relative;
+    z-index: 1;
+    padding-bottom: clamp(64px, 12vh, 120px);
+  }
+
+  .hero h1 {
+    font-size: clamp(3.4rem, 12vw, 9rem);
+    font-style: italic;
+    font-weight: 400;
+    margin: 0.75rem 0 0.5rem;
+  }
+
+  .hero-sub {
+    margin: 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+  }
+
+  .rolar {
+    position: absolute;
+    z-index: 1;
+    right: var(--margem);
+    bottom: clamp(64px, 12vh, 120px);
+    font-size: 1.4rem;
+    color: var(--texto-suave);
+    animation: flutuar 2.4s ease-in-out infinite;
+  }
+
+  .secao {
+    padding-top: clamp(64px, 12vh, 140px);
+  }
+
+  .secao > .rotulo {
+    margin: 0 0 2rem;
+  }
+
+  .ensaios {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(16px, 2vw, 32px);
+  }
+
+  .ensaio-imagem {
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: var(--fundo-2);
+    margin-bottom: 1.2rem;
+  }
+
+  .ensaio-imagem img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(0.4) brightness(0.85);
+    transition: transform 1s cubic-bezier(0.2, 0.6, 0.2, 1), filter 0.8s;
+  }
+
+  .ensaio:hover .ensaio-imagem img {
+    transform: scale(1.05);
+    filter: none;
+  }
+
+  .ensaio-vazio {
+    height: 100%;
+    background: linear-gradient(160deg, #1d1829, #0e0d12);
+    border: 1px solid var(--linha);
+  }
+
+  .ensaio-numero {
+    font-size: 0.75rem;
+    color: var(--destaque);
+    letter-spacing: 0.2em;
+  }
+
+  .ensaio h2 {
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+    font-style: italic;
+    margin: 0.2rem 0;
+  }
+
+  .ensaio p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+  }
+
+  .chamada {
+    padding-top: clamp(96px, 16vh, 180px);
+    text-align: center;
+  }
+
+  .chamada h2 {
+    font-size: clamp(2.6rem, 7vw, 5rem);
+    font-style: italic;
+  }
+
+  .chamada p {
+    color: var(--texto-suave);
+    margin: 1rem 0 2.5rem;
+  }
+
+  @media (max-width: 760px) {
+    .ensaios {
+      grid-template-columns: 1fr;
+    }
+
+    .ensaio-imagem {
+      aspect-ratio: 4 / 3;
+    }
+  }
+
+  @keyframes zoom {
+    from {
+      transform: scale(1.08);
+    }
+  }
+
+  @keyframes flutuar {
+    50% {
+      transform: translateY(8px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-foto,
+    .rolar {
+      animation: none;
+    }
+  }
+</style>

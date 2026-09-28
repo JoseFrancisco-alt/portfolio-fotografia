@@ -1,0 +1,99 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Base from '../layouts/Base.astro';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+
+// Coloque uma foto sua em src/assets/eu.jpg (ou .png/.webp) e ela aparece aqui.
+const minhaFoto = Object.values(
+  import.meta.glob<{ default: ImageMetadata }>('/src/assets/eu.{jpg,jpeg,png,webp}', { eager: true }),
+)[0]?.default;
+---
+
+<Base titulo="Sobre">
+  <section class="container sobre">
+    <div class="retrato revelar">
+      {minhaFoto ? (
+        <Image src={minhaFoto} alt={site.nome} widths={[480, 900]} sizes="(max-width: 860px) 100vw, 40vw" format="webp" />
+      ) : (
+        <div class="retrato-vazio"><span>sua foto aqui</span></div>
+      )}
+    </div>
+
+    <div class="texto">
+      <p class="rotulo">Sobre</p>
+      <h1>Olá, eu sou {site.nome.split(' ')[0]}.</h1>
+      {site.bio.map((paragrafo) => <p>{paragrafo}</p>)}
+
+      <h2 class="rotulo">Equipamento</h2>
+      <ul>
+        {site.equipamento.map((item) => <li>{item}</li>)}
+      </ul>
+
+      <a class="botao" href={url('/contato')}>Fale comigo</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .sobre {
+    display: grid;
+    grid-template-columns: 5fr 6fr;
+    gap: clamp(32px, 6vw, 96px);
+    align-items: center;
+    padding-top: clamp(120px, 18vh, 180px);
+  }
+
+  .retrato img,
+  .retrato-vazio {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  .retrato-vazio {
+    display: grid;
+    place-items: center;
+    background: linear-gradient(160deg, #1d1829, #0e0d12);
+    border: 1px solid var(--linha);
+    font-family: var(--fonte-titulo);
+    font-style: italic;
+    color: var(--texto-suave);
+  }
+
+  h1 {
+    font-size: clamp(2.6rem, 6vw, 4.5rem);
+    font-style: italic;
+    margin: 0.75rem 0 1.5rem;
+  }
+
+  .texto > p:not(.rotulo) {
+    color: #c9c5be;
+    max-width: 52ch;
+  }
+
+  h2.rotulo {
+    font-family: var(--fonte-texto);
+    font-weight: 400;
+    margin-top: 2.5rem;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 2.5rem;
+    color: var(--texto-suave);
+  }
+
+  li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--linha);
+  }
+
+  @media (max-width: 860px) {
+    .sobre {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

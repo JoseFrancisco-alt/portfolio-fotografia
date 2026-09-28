@@ -1,0 +1,88 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../data/site';
+
+const { instagram, whatsapp, email } = site.contato;
+const mensagem = encodeURIComponent('Olá! Vi seu portfólio e queria conversar sobre um ensaio.');
+
+const canais = [
+  { nome: 'Instagram', valor: `@${instagram}`, href: `https://instagram.com/${instagram}` },
+  { nome: 'WhatsApp', valor: 'Mandar mensagem', href: `https://wa.me/${whatsapp}?text=${mensagem}` },
+  { nome: 'E-mail', valor: email, href: `mailto:${email}` },
+];
+---
+
+<Base titulo="Contato" descricao={`Fale com ${site.nome} sobre ensaios e trabalhos.`}>
+  <section class="container titulo-pagina">
+    <p class="rotulo">Contato</p>
+    <h1>Vamos criar algo juntos.</h1>
+    <p>Ensaios de retrato, trabalhos autorais e parcerias. Respondo mais rápido pelo WhatsApp.</p>
+  </section>
+
+  <section class="container">
+    <ul class="canais">
+      {
+        canais.map((canal) => (
+          <li class="revelar">
+            <a href={canal.href} target="_blank" rel="noopener">
+              <span class="rotulo">{canal.nome}</span>
+              <span class="valor">{canal.valor}</span>
+              <span class="seta" aria-hidden="true">→</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .canais {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid var(--linha);
+  }
+
+  .canais a {
+    display: grid;
+    grid-template-columns: 9rem 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.8rem 0;
+    border-bottom: 1px solid var(--linha);
+    transition: padding 0.4s, color 0.3s;
+  }
+
+  .valor {
+    font-family: var(--fonte-titulo);
+    font-style: italic;
+    font-size: clamp(1.5rem, 4vw, 2.6rem);
+    overflow-wrap: anywhere;
+  }
+
+  .seta {
+    font-size: 1.5rem;
+    color: var(--texto-suave);
+    transition: transform 0.4s, color 0.3s;
+  }
+
+  .canais a:hover {
+    padding-left: 1rem;
+  }
+
+  .canais a:hover .seta {
+    color: var(--destaque);
+    transform: translateX(6px);
+  }
+
+  @media (max-width: 600px) {
+    .canais a {
+      grid-template-columns: 1fr auto;
+    }
+
+    .canais .rotulo {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

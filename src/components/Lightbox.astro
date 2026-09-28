@@ -1,0 +1,161 @@
+---
+// Abre a foto em tela cheia. Funciona com setas do teclado, Esc e deslizar o dedo.
+---
+
+<dialog class="lightbox" aria-label="Foto em tela cheia">
+  <figure>
+    <img alt="" />
+    <figcaption></figcaption>
+  </figure>
+  <button class="fechar" type="button" aria-label="Fechar">×</button>
+  <button class="seta anterior" type="button" aria-label="Foto anterior">‹</button>
+  <button class="seta proxima" type="button" aria-label="Próxima foto">›</button>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('.lightbox')!;
+  const img = dialog.querySelector('img')!;
+  const legenda = dialog.querySelector('figcaption')!;
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-lightbox]')];
+  let atual = 0;
+
+  function mostrar(indice: number) {
+    atual = (indice + links.length) % links.length;
+    const link = links[atual];
+    img.src = link.href;
+    img.alt = link.dataset.legenda ?? '';
+    legenda.textContent = link.dataset.legenda ?? '';
+  }
+
+  links.forEach((link, i) => {
+    link.addEventListener('click', (evento) => {
+      evento.preventDefault();
+      mostrar(i);
+      dialog.showModal();
+    });
+  });
+
+  if (links.length < 2) dialog.classList.add('unica');
+
+  dialog.querySelector('.fechar')!.addEventListener('click', () => dialog.close());
+  dialog.querySelector('.anterior')!.addEventListener('click', () => mostrar(atual - 1));
+  dialog.querySelector('.proxima')!.addEventListener('click', () => mostrar(atual + 1));
+
+  dialog.addEventListener('keydown', (evento) => {
+    if (evento.key === 'ArrowRight') mostrar(atual + 1);
+    if (evento.key === 'ArrowLeft') mostrar(atual - 1);
+  });
+
+  // Clicar no fundo escuro fecha
+  dialog.addEventListener('click', (evento) => {
+    if (evento.target === dialog || evento.target === dialog.querySelector('figure')) dialog.close();
+  });
+
+  // Deslizar o dedo no celular
+  let inicioX = 0;
+  dialog.addEventListener('touchstart', (e) => (inicioX = e.changedTouches[0].clientX), { passive: true });
+  dialog.addEventListener('touchend', (e) => {
+    const distancia = e.changedTouches[0].clientX - inicioX;
+    if (Math.abs(distancia) > 50) mostrar(atual + (distancia < 0 ? 1 : -1));
+  });
+</script>
+
+<style>
+  .lightbox {
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgb(5 5 6 / 0.97);
+    color: var(--texto);
+  }
+
+  .lightbox::backdrop {
+    background: rgb(0 0 0 / 0.8);
+  }
+
+  .lightbox[open] {
+    animation: aparecer 0.3s ease;
+  }
+
+  figure {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 1rem;
+    height: 100%;
+    margin: 0;
+    padding: 4rem clamp(16px, 6vw, 96px);
+  }
+
+  img {
+    max-width: 100%;
+    max-height: calc(100dvh - 9rem);
+    object-fit: contain;
+  }
+
+  figcaption {
+    font-family: var(--fonte-titulo);
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--texto-suave);
+    text-transform: lowercase;
+  }
+
+  button {
+    position: absolute;
+    background: none;
+    border: 0;
+    color: var(--texto);
+    font-size: 2.6rem;
+    font-weight: 200;
+    line-height: 1;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  button:hover,
+  button:focus-visible {
+    opacity: 1;
+  }
+
+  .fechar {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .seta {
+    top: 50%;
+    translate: 0 -50%;
+    font-size: 3.4rem;
+  }
+
+  .anterior {
+    left: 0.25rem;
+  }
+
+  .proxima {
+    right: 0.25rem;
+  }
+
+  .unica .seta {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .seta {
+      display: none; /* no celular, desliza com o dedo */
+    }
+  }
+
+  @keyframes aparecer {
+    from {
+      opacity: 0;
+    }
+  }
+</style>

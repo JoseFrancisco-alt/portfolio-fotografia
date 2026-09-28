@@ -1,0 +1,34 @@
+---
+import { site } from '../data/site';
+
+const ano = new Date().getFullYear();
+---
+
+<footer class="rodape container">
+  <p>© {ano} {site.nome}. Todas as fotos são autorais.</p>
+  <a href={`https://instagram.com/${site.contato.instagram}`} target="_blank" rel="noopener">
+    @{site.contato.instagram}
+  </a>
+</footer>
+
+<style>
+  .rodape {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 8rem;
+    padding-block: 2.5rem;
+    border-top: 1px solid var(--linha);
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+  }
+
+  .rodape p {
+    margin: 0;
+  }
+
+  .rodape a:hover {
+    color: var(--destaque);
+  }
+</style>

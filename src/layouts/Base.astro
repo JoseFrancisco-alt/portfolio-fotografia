@@ -1,0 +1,45 @@
+---
+import Nav from '../components/Nav.astro';
+import Rodape from '../components/Rodape.astro';
+import Lightbox from '../components/Lightbox.astro';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+import '../styles/global.css';
+
+interface Props {
+  titulo?: string;
+  descricao?: string;
+}
+
+const { titulo, descricao = site.descricao } = Astro.props;
+const tituloCompleto = titulo ? `${titulo} — ${site.nome}` : `${site.nome} · Fotografia`;
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={descricao} />
+    <meta name="theme-color" content="#0b0a0f" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={descricao} />
+    <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap"
+    />
+  </head>
+  <body>
+    <Nav />
+    <main>
+      <slot />
+    </main>
+    <Rodape />
+    <Lightbox />
+  </body>
+</html>
