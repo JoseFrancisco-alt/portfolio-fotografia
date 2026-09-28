@@ -29,7 +29,7 @@ const proporcoes = ['4/5', '3/2', '2/3', '16/9', '1/1', '4/5', '3/2', '2/3', '3/
   {
     itens.length > 0
       ? itens.map((foto, i) => (
-          <a class="item revelar" href={foto.grande.src} data-lightbox data-legenda={foto.alt}>
+          <a class="item revelar" href={foto.grande.src} data-lightbox data-legenda={foto.alt} data-tilt>
             <Image
               src={foto.src}
               alt={foto.alt}
@@ -42,7 +42,7 @@ const proporcoes = ['4/5', '3/2', '2/3', '16/9', '1/1', '4/5', '3/2', '2/3', '3/
           </a>
         ))
       : Array.from({ length: vazios }, (_, i) => (
-          <div class="item vazio revelar" style={`aspect-ratio: ${proporcoes[i % proporcoes.length]}`}>
+          <div class="item vazio revelar" style={`aspect-ratio: ${proporcoes[i % proporcoes.length]}`} data-tilt>
             <span>sua foto aqui</span>
           </div>
         ))

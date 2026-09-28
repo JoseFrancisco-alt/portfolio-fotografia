@@ -112,11 +112,57 @@ h3 {
   transition: background 0.3s, color 0.3s;
 }
 
+.botao {
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s, translate 0.3s;
+}
+
 .botao:hover {
   background: var(--destaque-forte);
   border-color: var(--destaque-forte);
   color: var(--texto);
   box-shadow: 0 0 32px rgb(124 58 237 / 0.45);
+  translate: 0 -3px;
+}
+
+/* Inclinação 3D que segue o mouse (os valores --rx/--ry vêm do EfeitosMouse.astro) */
+[data-tilt] {
+  position: relative;
+  transform: perspective(900px) translateY(var(--sobe, 0px)) rotateX(var(--rx, 0deg))
+    rotateY(var(--ry, 0deg));
+  transition:
+    transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.4s,
+    outline-color 0.4s;
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+}
+
+[data-tilt]:hover {
+  --sobe: -6px;
+  box-shadow:
+    0 24px 48px rgb(0 0 0 / 0.6),
+    0 0 36px rgb(124 58 237 / 0.35);
+  outline-color: rgb(167 139 250 / 0.5);
+  transition-duration: 0.15s, 0.4s, 0.4s; /* segue o mouse rápido */
+}
+
+/* Reflexo de luz que acompanha o mouse */
+[data-tilt]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--luz-x, 50%) var(--luz-y, 50%),
+    rgb(167 139 250 / 0.18),
+    transparent 55%
+  );
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+[data-tilt]:hover::after {
+  opacity: 1;
 }
 
 ::selection {
@@ -133,10 +179,11 @@ h3 {
   }
 }
 
+/* Usa "translate" (e não "transform") para não brigar com a inclinação 3D */
 @keyframes revelar {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    translate: 0 24px;
   }
 }
 

@@ -1,13 +1,14 @@
 ---
 import Base from '../layouts/Base.astro';
-import { site } from '../data/site';
+import { site, criacaoDeSites } from '../data/site';
 
 const { instagram, whatsapp, email } = site.contato;
-const mensagem = encodeURIComponent('Olá! Vi seu portfólio e queria conversar sobre um ensaio.');
+const whats = (texto: string) => `https://wa.me/${whatsapp}?text=${encodeURIComponent(texto)}`;
 
 const canais = [
+  { nome: 'Ensaio', valor: 'Agendar pelo WhatsApp', href: whats('Olá! Vi seu portfólio e queria conversar sobre um ensaio.') },
+  { nome: 'Site', valor: 'Quero um portfólio', href: whats(criacaoDeSites.mensagemWhatsApp) },
   { nome: 'Instagram', valor: `@${instagram}`, href: `https://instagram.com/${instagram}` },
-  { nome: 'WhatsApp', valor: 'Mandar mensagem', href: `https://wa.me/${whatsapp}?text=${mensagem}` },
   { nome: 'E-mail', valor: email, href: `mailto:${email}` },
 ];
 ---
@@ -16,7 +17,10 @@ const canais = [
   <section class="container titulo-pagina">
     <p class="rotulo">Contato</p>
     <h1>Vamos criar algo juntos.</h1>
-    <p>Ensaios de retrato, trabalhos autorais e parcerias. Respondo mais rápido pelo WhatsApp.</p>
+    <p>
+      Ensaios de retrato, trabalhos autorais e parcerias. Também crio sites de portfólio. Respondo mais rápido pelo
+      WhatsApp.
+    </p>
   </section>
 
   <section class="container">
@@ -67,8 +71,20 @@ const canais = [
     transition: transform 0.4s, color 0.3s;
   }
 
+  .canais a {
+    background: linear-gradient(90deg, rgb(124 58 237 / 0.12), transparent 60%) no-repeat;
+    background-size: 0% 100%;
+    transition: padding 0.4s, background-size 0.5s;
+  }
+
   .canais a:hover {
     padding-left: 1rem;
+    background-size: 100% 100%;
+    box-shadow: inset 2px 0 0 var(--destaque);
+  }
+
+  .canais a:hover .valor {
+    color: var(--destaque);
   }
 
   .canais a:hover .seta {

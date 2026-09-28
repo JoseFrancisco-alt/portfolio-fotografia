@@ -1,0 +1,46 @@
+---
+// Efeitos que seguem o mouse. Só liga em computador (no celular não tem mouse).
+//  - data-tilt     → o elemento inclina em 3D na direção do mouse
+//  - data-parallax → os filhos se movem em camadas (usa as variáveis --px e --py no CSS)
+---
+
+<script>
+  const temMouse = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const semMovimento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (temMouse && !semMovimento) {
+    const INCLINACAO = 8; // graus máximos. Aumente para um efeito mais forte
+
+    document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((el) => {
+      el.addEventListener('pointermove', (e) => {
+        const caixa = el.getBoundingClientRect();
+        // Posição do mouse dentro do elemento, de -0.5 (esquerda/topo) a 0.5 (direita/baixo)
+        const x = (e.clientX - caixa.left) / caixa.width - 0.5;
+        const y = (e.clientY - caixa.top) / caixa.height - 0.5;
+        el.style.setProperty('--rx', `${-y * INCLINACAO}deg`);
+        el.style.setProperty('--ry', `${x * INCLINACAO}deg`);
+        el.style.setProperty('--luz-x', `${(x + 0.5) * 100}%`);
+        el.style.setProperty('--luz-y', `${(y + 0.5) * 100}%`);
+      });
+
+      el.addEventListener('pointerleave', () => {
+        el.style.removeProperty('--rx');
+        el.style.removeProperty('--ry');
+      });
+    });
+
+    // Parallax segue o mouse na janela toda (inclusive em cima do menu)
+    const camadas = document.querySelectorAll<HTMLElement>('[data-parallax]');
+    const moverCamadas = (x: number, y: number) => {
+      camadas.forEach((el) => {
+        el.style.setProperty('--px', x.toFixed(3));
+        el.style.setProperty('--py', y.toFixed(3));
+      });
+    };
+
+    if (camadas.length > 0) {
+      addEventListener('pointermove', (e) => moverCamadas(e.clientX / innerWidth - 0.5, e.clientY / innerHeight - 0.5));
+      document.documentElement.addEventListener('pointerleave', () => moverCamadas(0, 0));
+    }
+  }
+</script>

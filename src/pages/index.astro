@@ -2,39 +2,55 @@
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Galeria from '../components/Galeria.astro';
-import { site, categorias } from '../data/site';
+import { site, categorias, criacaoDeSites } from '../data/site';
 import { capa, fotosDa, selecionadas } from '../lib/fotos';
 import { url } from '../lib/url';
 
 const fotoCapa = capa();
 const ensaios = categorias.map((c) => ({ ...c, foto: fotosDa(c.slug)[0], total: fotosDa(c.slug).length }));
+const linkSite = `https://wa.me/${site.contato.whatsapp}?text=${encodeURIComponent(criacaoDeSites.mensagemWhatsApp)}`;
 ---
 
 <Base>
-  <section class="hero">
-    {
-      fotoCapa ? (
-        <Image
-          class="hero-foto"
-          src={fotoCapa.src}
-          alt={fotoCapa.alt}
-          widths={[800, 1400, 2200]}
-          sizes="100vw"
-          format="webp"
-          quality={80}
-          loading="eager"
-          fetchpriority="high"
-        />
-      ) : (
-        <div class="hero-foto hero-vazio" />
-      )
-    }
-    <div class="hero-texto container">
-      <p class="rotulo">Fotografia · {site.cidade}</p>
-      <h1>{site.nome}</h1>
-      <p class="hero-sub">{categorias.map((c) => c.titulo).join(' · ')}</p>
+  <!-- Capa: frase grande por cima da foto + bloco roxo atrás (tudo com parallax) -->
+  <section class="hero" data-parallax>
+    <div class="hero-bloco" aria-hidden="true"></div>
+
+    <div class="hero-moldura">
+      {
+        fotoCapa ? (
+          <Image
+            class="hero-foto"
+            src={fotoCapa.src}
+            alt={fotoCapa.alt}
+            widths={[800, 1400, 2000]}
+            sizes="(max-width: 860px) 100vw, 60vw"
+            format="webp"
+            quality={80}
+            loading="eager"
+            fetchpriority="high"
+          />
+        ) : (
+          <div class="hero-foto hero-vazio">
+            <span>sua foto de capa</span>
+          </div>
+        )
+      }
     </div>
-    <a class="rolar" href="#ensaios" aria-label="Ver ensaios">↓</a>
+
+    <div class="hero-texto container">
+      <p class="rotulo entrar">Fotografia · {site.cidade}</p>
+      <h1 class="entrar">
+        {site.frase.inicio} <em class="marca-texto">{site.frase.destaque}</em>
+      </h1>
+      <p class="hero-assinatura entrar">
+        {site.nome} — {categorias.map((c) => c.titulo).join(' · ')}
+      </p>
+      <div class="hero-acoes entrar">
+        <a class="botao" href="#ensaios">Ver ensaios</a>
+        <a class="link-seta" href={url('/contato')}>Fale comigo <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
   </section>
 
   <section id="ensaios" class="container secao">
@@ -43,7 +59,7 @@ const ensaios = categorias.map((c) => ({ ...c, foto: fotosDa(c.slug)[0], total: 
       {
         ensaios.map((ensaio, i) => (
           <a class="ensaio revelar" href={url(`/${ensaio.slug}`)}>
-            <div class="ensaio-imagem">
+            <div class="ensaio-imagem" data-tilt>
               {ensaio.foto ? (
                 <Image src={ensaio.foto.src} alt={ensaio.foto.alt} widths={[480, 800]} sizes="(max-width: 760px) 100vw, 33vw" format="webp" />
               ) : (
@@ -51,7 +67,9 @@ const ensaios = categorias.map((c) => ({ ...c, foto: fotosDa(c.slug)[0], total: 
               )}
             </div>
             <span class="ensaio-numero">0{i + 1}</span>
-            <h2>{ensaio.titulo}</h2>
+            <h2>
+              {ensaio.titulo} <span class="ensaio-seta" aria-hidden="true">→</span>
+            </h2>
             <p>{ensaio.total > 0 ? `${ensaio.total} fotos` : 'em breve'}</p>
           </a>
         ))
@@ -65,79 +83,198 @@ const ensaios = categorias.map((c) => ({ ...c, foto: fotosDa(c.slug)[0], total: 
   </section>
 
   <section class="container chamada revelar">
-    <h2>Vamos fotografar?</h2>
+    <h2>Vamos <em class="marca-texto">fotografar?</em></h2>
     <p>Ensaios de retrato, trabalhos autorais e parcerias.</p>
     <a class="botao" href={url('/contato')}>Entrar em contato</a>
+  </section>
+
+  <!-- Divulgação: criação de sites (seção secundária, no fim da página) -->
+  <section id="sites" class="container sites revelar">
+    <div class="sites-texto">
+      <p class="rotulo">Também faço</p>
+      <h2>{criacaoDeSites.titulo}</h2>
+      <p>{criacaoDeSites.texto}</p>
+      <ul>
+        {criacaoDeSites.vantagens.map((item) => <li>{item}</li>)}
+      </ul>
+      <a class="link-seta" href={linkSite} target="_blank" rel="noopener">
+        Quero meu site <span aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <!-- Mini "navegador" desenhado só com CSS, inclina com o mouse -->
+    <div class="navegador" data-tilt aria-hidden="true">
+      <div class="navegador-barra">
+        <i></i><i></i><i></i>
+        <span>seunome.github.io</span>
+      </div>
+      <div class="navegador-tela">
+        <div class="mini-bloco"></div>
+        <div class="mini-foto"></div>
+        <div class="mini-linha grande"></div>
+        <div class="mini-linha grande curta"></div>
+        <div class="mini-linha"></div>
+        <div class="mini-grade"><b></b><b></b><b></b></div>
+      </div>
+    </div>
   </section>
 </Base>
 
 <style>
+  /* ---------- CAPA ---------- */
   .hero {
     position: relative;
-    height: 100svh;
-    min-height: 520px;
-    overflow: hidden;
+    min-height: 100svh;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
+    overflow: hidden;
+    padding-block: 110px 60px;
+  }
+
+  /* Bloco de cor atrás do texto (ideia do portfólio do Sean O'Brien) */
+  .hero-bloco {
+    position: absolute;
+    left: 7%;
+    bottom: 9%;
+    width: 28%;
+    height: 34%;
+    background: linear-gradient(135deg, #6d28d9, #2e1065);
+    box-shadow: 0 0 80px rgb(124 58 237 / 0.3);
+    translate: calc(var(--px, 0) * 40px) calc(var(--py, 0) * 40px);
+    transition: translate 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  /* Foto do lado direito, o texto invade por cima dela */
+  .hero-moldura {
+    position: absolute;
+    top: 13%;
+    right: 0;
+    width: 58%;
+    height: 72%;
+    overflow: hidden;
+    background: var(--fundo-2);
   }
 
   .hero-foto {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+    inset: -30px; /* sobra nas bordas para a foto poder se mexer */
+    width: calc(100% + 60px);
+    height: calc(100% + 60px);
     object-fit: cover;
     animation: zoom 18s ease-out both;
+    translate: calc(var(--px, 0) * -30px) calc(var(--py, 0) * -30px);
+    transition: translate 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
   .hero-vazio {
+    display: grid;
+    place-items: center;
     background:
-      radial-gradient(ellipse at 70% 30%, #3b2466 0%, transparent 55%),
-      radial-gradient(ellipse at 20% 80%, #1a1633 0%, transparent 60%),
-      var(--fundo);
+      radial-gradient(ellipse at 60% 35%, #3b2466 0%, transparent 60%),
+      linear-gradient(160deg, #1d1829, #0e0d12);
   }
 
-  /* Vinheta cinematográfica */
-  .hero::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(to top, var(--fundo) 0%, transparent 45%),
-      radial-gradient(ellipse at center, transparent 50%, rgb(0 0 0 / 0.55) 100%);
+  .hero-vazio span {
+    font-family: var(--fonte-titulo);
+    font-style: italic;
+    font-size: 1.3rem;
+    color: var(--texto-suave);
   }
 
   .hero-texto {
     position: relative;
-    z-index: 1;
-    padding-bottom: clamp(64px, 12vh, 120px);
+    z-index: 2;
+    translate: calc(var(--px, 0) * 16px) calc(var(--py, 0) * 12px);
+    transition: translate 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
+  /* Frase grande e pesada, estilo revista */
   .hero h1 {
-    font-size: clamp(3.4rem, 12vw, 9rem);
-    font-style: italic;
-    font-weight: 400;
-    margin: 0.75rem 0 0.5rem;
-  }
-
-  .hero-sub {
-    margin: 0;
-    font-size: 0.85rem;
-    letter-spacing: 0.3em;
+    max-width: 13ch;
+    margin: 1rem 0 1.5rem;
+    font-family: var(--fonte-texto);
+    font-size: clamp(2.6rem, 6.4vw, 6.2rem);
+    font-weight: 800;
+    line-height: 0.98;
+    letter-spacing: -0.03em;
     text-transform: uppercase;
-    color: var(--texto-suave);
+    text-shadow: 0 4px 30px rgb(0 0 0 / 0.5);
   }
 
-  .rolar {
-    position: absolute;
-    z-index: 1;
-    right: var(--margem);
-    bottom: clamp(64px, 12vh, 120px);
-    font-size: 1.4rem;
-    color: var(--texto-suave);
-    animation: flutuar 2.4s ease-in-out infinite;
+  .hero h1 .marca-texto {
+    font-family: var(--fonte-titulo);
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 1.12em;
   }
 
+  /* Marca-texto roxo embaixo da frase (ideia do portfólio da Melyssa Griffin) */
+  .marca-texto {
+    font-style: italic;
+    background: linear-gradient(transparent 62%, rgb(124 58 237 / 0.85) 62%, rgb(124 58 237 / 0.85) 90%, transparent 90%)
+      no-repeat;
+    background-size: 0% 100%;
+    animation: marcar 1s 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    padding-inline: 0.05em;
+  }
+
+  .hero-assinatura {
+    margin: 0 0 2rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgb(236 233 242 / 0.8);
+    text-shadow: 0 1px 12px rgb(0 0 0 / 0.6);
+  }
+
+  .hero-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem 2rem;
+  }
+
+  .link-seta {
+    font-size: 0.78rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+
+  .link-seta span {
+    display: inline-block;
+    transition: translate 0.3s;
+  }
+
+  .link-seta:hover {
+    color: var(--destaque);
+  }
+
+  .link-seta:hover span {
+    translate: 6px 0;
+  }
+
+  /* Texto da capa entra deslizando, um depois do outro */
+  .entrar {
+    animation: entrar 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  h1.entrar {
+    animation-delay: 0.1s;
+  }
+
+  .hero-assinatura.entrar {
+    animation-delay: 0.25s;
+  }
+
+  .hero-acoes.entrar {
+    animation-delay: 0.4s;
+  }
+
+  /* ---------- ENSAIOS ---------- */
   .secao {
     padding-top: clamp(64px, 12vh, 140px);
   }
@@ -188,6 +325,27 @@ const ensaios = categorias.map((c) => ({ ...c, foto: fotosDa(c.slug)[0], total: 
     font-size: clamp(2rem, 3.5vw, 2.8rem);
     font-style: italic;
     margin: 0.2rem 0;
+    transition: color 0.3s;
+  }
+
+  .ensaio:hover h2 {
+    color: var(--destaque);
+  }
+
+  .ensaio-seta {
+    display: inline-block;
+    font-family: var(--fonte-texto);
+    font-size: 0.5em;
+    font-style: normal;
+    vertical-align: middle;
+    opacity: 0;
+    translate: -10px 0;
+    transition: opacity 0.3s, translate 0.3s;
+  }
+
+  .ensaio:hover .ensaio-seta {
+    opacity: 1;
+    translate: 0 0;
   }
 
   .ensaio p {
@@ -196,6 +354,7 @@ const ensaios = categorias.map((c) => ({ ...c, foto: fotosDa(c.slug)[0], total: 
     color: var(--texto-suave);
   }
 
+  /* ---------- CHAMADA ---------- */
   .chamada {
     padding-top: clamp(96px, 16vh, 180px);
     text-align: center;
@@ -203,12 +362,185 @@ const ensaios = categorias.map((c) => ({ ...c, foto: fotosDa(c.slug)[0], total: 
 
   .chamada h2 {
     font-size: clamp(2.6rem, 7vw, 5rem);
-    font-style: italic;
+  }
+
+  .chamada .marca-texto {
+    animation-timeline: view();
+    animation-range: entry 40% cover 45%;
+    animation-delay: 0s;
+    animation-duration: auto;
   }
 
   .chamada p {
     color: var(--texto-suave);
     margin: 1rem 0 2.5rem;
+  }
+
+  /* ---------- CRIAÇÃO DE SITES ---------- */
+  .sites {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    align-items: center;
+    gap: clamp(32px, 6vw, 96px);
+    margin-top: clamp(96px, 16vh, 180px);
+    padding-top: clamp(64px, 10vh, 110px);
+    border-top: 1px solid var(--linha);
+  }
+
+  .sites h2 {
+    font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+    font-style: italic;
+    margin: 0.75rem 0 1.2rem;
+  }
+
+  .sites-texto > p:not(.rotulo) {
+    color: var(--texto-suave);
+    max-width: 46ch;
+  }
+
+  .sites ul {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 2.2rem;
+  }
+
+  .sites li {
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--linha);
+    font-size: 0.95rem;
+  }
+
+  .sites li::before {
+    content: '✦';
+    color: var(--destaque);
+    margin-right: 0.8rem;
+  }
+
+  .navegador {
+    border: 1px solid var(--linha);
+    background: var(--fundo-2);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .navegador-barra {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--linha);
+  }
+
+  .navegador-barra i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--linha);
+  }
+
+  .navegador-barra span {
+    margin-left: 12px;
+    padding: 2px 12px;
+    border-radius: 99px;
+    background: var(--fundo);
+    font-size: 0.7rem;
+    color: var(--texto-suave);
+  }
+
+  .navegador-tela {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    padding: 12% 8%;
+    background: var(--fundo);
+  }
+
+  .navegador-tela > div {
+    position: relative;
+  }
+
+  .mini-bloco {
+    position: absolute !important;
+    left: 10%;
+    bottom: 26%;
+    width: 30%;
+    height: 32%;
+    background: linear-gradient(135deg, var(--destaque-forte), #4c1d95);
+  }
+
+  .mini-foto {
+    position: absolute !important;
+    right: 0;
+    top: 10%;
+    width: 55%;
+    height: 62%;
+    background: radial-gradient(ellipse at 60% 40%, #3b2466, #17141f);
+  }
+
+  .mini-linha {
+    height: 8px;
+    width: 40%;
+    margin-bottom: 8px;
+    background: var(--texto-suave);
+    opacity: 0.5;
+  }
+
+  .mini-linha.grande {
+    height: 16px;
+    width: 55%;
+    background: var(--texto);
+    opacity: 0.9;
+  }
+
+  .mini-linha.curta {
+    width: 38%;
+  }
+
+  .mini-grade {
+    position: absolute !important;
+    left: 8%;
+    right: 8%;
+    bottom: 6%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .mini-grade b {
+    height: 22px;
+    background: #231d33;
+  }
+
+  /* ---------- CELULAR ---------- */
+  @media (max-width: 860px) {
+    .hero {
+      flex-direction: column;
+      align-items: stretch;
+      padding-top: 88px;
+    }
+
+    .hero-moldura {
+      position: relative;
+      top: 0;
+      width: 84%;
+      height: 50svh;
+      margin-left: auto;
+    }
+
+    .hero-bloco {
+      left: 0;
+      top: 36svh;
+      bottom: auto;
+      width: 45%;
+      height: 28svh;
+    }
+
+    .hero-texto {
+      margin-top: -3.5rem;
+    }
+
+    .sites {
+      grid-template-columns: 1fr;
+    }
   }
 
   @media (max-width: 760px) {
@@ -221,22 +553,35 @@ const ensaios = categorias.map((c) => ({ ...c, foto: fotosDa(c.slug)[0], total: 
     }
   }
 
+  /* ---------- ANIMAÇÕES ---------- */
   @keyframes zoom {
     from {
       transform: scale(1.08);
     }
   }
 
-  @keyframes flutuar {
-    50% {
-      transform: translateY(8px);
+  @keyframes entrar {
+    from {
+      opacity: 0;
+      translate: 0 30px;
+    }
+  }
+
+  @keyframes marcar {
+    to {
+      background-size: 100% 100%;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .hero-foto,
-    .rolar {
+    .entrar {
       animation: none;
+    }
+
+    .marca-texto {
+      animation: none;
+      background-size: 100% 100%;
     }
   }
 </style>
