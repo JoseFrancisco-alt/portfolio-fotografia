@@ -11,8 +11,9 @@ export const site = {
     destaque: 'o que o olho sente.',
   },
   bio: [
-    'Sou fotógrafo e estudante. Gosto de luz baixa, lugares abertos e de gente de verdade.',
-    'Este site reúne os ensaios que mais me representam: paisagens, retratos e cenas de rua.',
+    'Tô começando na fotografia e aprendendo no caminho: saio com a Nikon pendurada no pescoço, correndo atrás de fim de tarde, luz de rua e gente sendo gente.',
+    'Entre uma linha de código e outra, eu fotografo. Esse site é onde as coisas que eu mais amo se encontram: programação, fotografia e arte. Todas as fotos aqui são minhas, e o site em si também é parte do projeto.',
+    'Ainda tô no começo, mas é exatamente isso que eu quero mostrar: evolução. Se curtiu, chega junto.',
   ],
   equipamento: ['Câmera: Nikon D3200'],
   contato: {
