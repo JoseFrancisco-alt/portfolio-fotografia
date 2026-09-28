@@ -24,7 +24,17 @@ export const site = {
 
 // Fotos do slider principal da home, na ordem em que aparecem.
 // Formato: 'categoria/nome-do-arquivo' (sem o .jpg). Lista vazia = escolha automática.
-export const destaques: string[] = [];
+export const destaques: string[] = [
+  'rua/01-capa-mortal-no-barco',
+  'retrato/01-noite-em-roxo',
+  'paisagem/01-sol-sobre-a-baia',
+  'rua/02-noite-de-festa',
+  'retrato/02-olhando-a-cidade',
+  'paisagem/02-barcos-na-hora-dourada',
+  'rua/03-luzes-da-praca',
+  'retrato/03-camisa-10',
+  'paisagem/03-fim-de-tarde-nas-pedras',
+];
 
 // Divulgação: você também cria sites de portfólio para outras pessoas.
 // Aparece como uma seção na home (não é o foco do site) e na página de contato.
