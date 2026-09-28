@@ -1,4 +1,5 @@
 import type { ImageMetadata } from 'astro';
+import { categorias } from '../data/site';
 
 // Lê automaticamente toda imagem dentro de src/assets/fotos/<categoria>/
 // Nome do arquivo vira a legenda: "03-por-do-sol-na-serra.jpg" -> "por do sol na serra"
@@ -33,8 +34,13 @@ export const fotos: Foto[] = Object.entries(arquivos)
   })
   .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
 
+// Fotos de uma categoria, com a capa escolhida em site.ts (se houver) na frente.
 export function fotosDa(categoria: string) {
-  return fotos.filter((foto) => foto.categoria === categoria);
+  const lista = fotos.filter((foto) => foto.categoria === categoria);
+  const nomeCapa = categorias.find((c) => c.slug === categoria)?.capa;
+  const i = lista.findIndex((f) => f.nome === nomeCapa);
+  if (i > 0) lista.unshift(...lista.splice(i, 1));
+  return lista;
 }
 
 // Mistura as categorias (1 de cada, depois a próxima de cada...) para a home.

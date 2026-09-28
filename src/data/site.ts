@@ -61,7 +61,8 @@ export const criacaoDeSites = {
 
 // Cada categoria vira uma página (/paisagem, /retrato, /rua)
 // e lê as fotos de src/assets/fotos/<slug>/
-export const categorias = [
+// "capa" (opcional) = nome do arquivo sem .jpg: aparece no cartão da home, no menu e primeiro na galeria.
+export const categorias: { slug: string; titulo: string; descricao: string; capa?: string }[] = [
   {
     slug: 'paisagem',
     titulo: 'Paisagem',
@@ -71,10 +72,12 @@ export const categorias = [
     slug: 'retrato',
     titulo: 'Retrato',
     descricao: 'Pessoas, olhares e a luz certa no rosto certo.',
+    capa: '10-perfil-na-noite',
   },
   {
     slug: 'rua',
     titulo: 'Rua',
     descricao: 'O acaso da cidade: sombras, pressa e momentos que não se repetem.',
+    capa: '03-luzes-da-praca',
   },
 ];
