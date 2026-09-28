@@ -14,7 +14,7 @@ export const site = {
     'Sou fotógrafo e estudante. Gosto de luz baixa, lugares abertos e de gente de verdade.',
     'Este site reúne os ensaios que mais me representam: paisagens, retratos e cenas de rua.',
   ],
-  equipamento: ['Câmera: —', 'Lentes: —', 'Edição: Lightroom'],
+  equipamento: ['Câmera: Nikon D3200'],
   contato: {
     instagram: 'seu.usuario', // só o @, sem o "@"
     whatsapp: '5500000000000', // DDI + DDD + número, só dígitos
