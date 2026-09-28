@@ -2,11 +2,13 @@
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Destaques from '../components/Destaques.astro';
+import CameraCena from '../components/CameraCena.astro';
 import { site, categorias, criacaoDeSites, destaques } from '../data/site';
 import { capa, fotosDa, fotosEmDestaque } from '../lib/fotos';
 import { url } from '../lib/url';
 
 const fotoCapa = capa();
+const fotosDestaque = fotosEmDestaque(destaques);
 const ensaios = categorias.map((c) => ({ ...c, foto: fotosDa(c.slug)[0], total: fotosDa(c.slug).length }));
 const linkSite = `https://wa.me/${site.contato.whatsapp}?text=${encodeURIComponent(criacaoDeSites.mensagemWhatsApp)}`;
 ---
@@ -53,7 +55,10 @@ const linkSite = `https://wa.me/${site.contato.whatsapp}?text=${encodeURICompone
     </div>
   </section>
 
-  <Destaques fotos={fotosEmDestaque(destaques)} />
+  <!-- Câmera 3D que vira de costas com a rolagem e dá zoom no display até virar o slider (anime.js) -->
+  <CameraCena foto={fotosDestaque[0]}>
+    <Destaques fotos={fotosDestaque} />
+  </CameraCena>
 
   <!-- Faixa de texto que corre para o lado com a rolagem (ScrollTrigger) -->
   <div class="faixa" aria-hidden="true">

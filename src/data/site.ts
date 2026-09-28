@@ -11,7 +11,7 @@ export const site = {
     destaque: 'o que o olho sente.',
   },
   bio: [
-    'Tô começando na fotografia e aprendendo no caminho: saio com a Nikon pendurada no pescoço, correndo atrás de fim de tarde, luz de rua e gente sendo gente.',
+    'Tô começando na fotografia e pronto pra tirar os melhores cliques: registrar o seu lifestyle, os seus rolês, as pessoas que você ama e muito mais.',
     'Entre uma linha de código e outra, eu fotografo. Esse site é onde as coisas que eu mais amo se encontram: programação, fotografia e arte. Todas as fotos aqui são minhas, e o site em si também é parte do projeto.',
     'Ainda tô no começo, mas é exatamente isso que eu quero mostrar: evolução. Se curtiu, chega junto.',
   ],
@@ -19,7 +19,6 @@ export const site = {
   contato: {
     instagram: '_avila.jf', // só o @, sem o "@"
     whatsapp: '5582993327581', // DDI + DDD + número, só dígitos
-    email: 'voce@exemplo.com',
   },
 };
 
