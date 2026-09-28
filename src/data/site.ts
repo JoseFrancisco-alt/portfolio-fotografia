@@ -4,7 +4,7 @@ export const site = {
   nome: 'Francis Avila',
   apelido: 'Ávila', // como o pessoal te chama (aparece no "Olá, eu sou...")
   descricao: 'Fotografia de paisagem, retrato e rua.',
-  cidade: 'Sua cidade, Brasil',
+  cidade: 'Maceió, Brasil',
   // Frase grande da capa. "destaque" ganha o marca-texto roxo.
   frase: {
     inicio: 'Fotografias que guardam',
@@ -25,27 +25,28 @@ export const site = {
 // Foto grande do topo da home. Formato: 'categoria/nome-do-arquivo' (sem o .jpg).
 export const capaPrincipal = 'paisagem/01-sol-sobre-a-baia';
 
-// Fotos do slider principal da home, na ordem em que aparecem.
+// Fotos do slider principal da home, na ordem em que aparecem (da mais escura para a mais clara;
+// a primeira também aparece no display da câmera 3D).
 // Formato: 'categoria/nome-do-arquivo' (sem o .jpg). Lista vazia = escolha automática.
 export const destaques: string[] = [
-  'retrato/10-perfil-na-noite',
+  'rua/02-noite-de-festa',
+  'rua/03-luzes-da-praca',
   'retrato/09-wonder-why',
-  'rua/12-kit-de-praia',
-  'paisagem/06-ceu-amarelo-e-coqueiros',
-  'rua/07-escola-de-surf',
-  'retrato/07-amigos-no-mar',
+  'retrato/02-olhando-a-cidade',
+  'retrato/10-perfil-na-noite',
+  'rua/06-bolsa-na-pedra',
+  'paisagem/03-fim-de-tarde-nas-pedras',
   'rua/08-buggy-e-bandeira',
   'rua/11-bar-da-praia',
-  'rua/09-ambulante-na-areia',
-  'rua/02-noite-de-festa',
+  'rua/07-escola-de-surf',
+  'paisagem/06-ceu-amarelo-e-coqueiros',
+  'rua/12-kit-de-praia',
   'retrato/05-sorriso',
-  'rua/03-luzes-da-praca',
-  'retrato/02-olhando-a-cidade',
-  'rua/06-bolsa-na-pedra',
-  'paisagem/05-barcos-no-azul',
-  'paisagem/03-fim-de-tarde-nas-pedras',
-  'paisagem/04-navio-ao-entardecer',
   'rua/01-capa-mortal-no-barco',
+  'paisagem/04-navio-ao-entardecer',
+  'paisagem/05-barcos-no-azul',
+  'rua/09-ambulante-na-areia',
+  'retrato/07-amigos-no-mar',
 ];
 
 // Divulgação: você também cria sites de portfólio para outras pessoas.
