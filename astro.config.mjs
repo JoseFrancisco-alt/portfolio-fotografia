@@ -1,9 +1,9 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
-// Quando publicar no GitHub Pages, troque SEU-USUARIO pelo seu usuário do GitHub.
-// Se o repositório se chamar "SEU-USUARIO.github.io", apague a linha "base".
+// "base" é o nome do repositório no GitHub.
+// Se um dia o repositório se chamar "josefrancisco-alt.github.io", apague a linha "base".
 export default defineConfig({
-  site: 'https://SEU-USUARIO.github.io',
+  site: 'https://josefrancisco-alt.github.io',
   base: '/portfolio-fotografia',
 });

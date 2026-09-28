@@ -3,7 +3,7 @@
 Site estático de fotografia (paisagem, retrato e rua) com visual escuro e cinematográfico.
 Feito com [Astro](https://astro.build), publicado no GitHub Pages.
 
-🔗 **Site no ar:** https://SEU-USUARIO.github.io/portfolio-fotografia
+🔗 **Site no ar:** https://josefrancisco-alt.github.io/portfolio-fotografia
 
 <!-- Depois de publicar, tire um print do site e coloque aqui: ![Print do site](docs/print.png) -->
 
