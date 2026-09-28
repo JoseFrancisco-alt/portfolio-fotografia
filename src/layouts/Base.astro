@@ -3,6 +3,8 @@ import Nav from '../components/Nav.astro';
 import Rodape from '../components/Rodape.astro';
 import Lightbox from '../components/Lightbox.astro';
 import EfeitosMouse from '../components/EfeitosMouse.astro';
+import Cursor from '../components/Cursor.astro';
+import Rolagem from '../components/Rolagem.astro';
 import { site } from '../data/site';
 import { url } from '../lib/url';
 import '../styles/global.css';
@@ -43,5 +45,7 @@ const tituloCompleto = titulo ? `${titulo} — ${site.nome}` : `${site.nome} · 
     <Rodape />
     <Lightbox />
     <EfeitosMouse />
+    <Rolagem />
+    <Cursor />
   </body>
 </html>

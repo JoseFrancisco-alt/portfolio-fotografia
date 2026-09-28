@@ -1,44 +1,131 @@
 ---
+// Menu em tela cheia (inspirado no "T.RICKS Menu"): botão redondo, fundo que abre em círculo,
+// links grandes entrando um por um e miniatura da foto ao passar o mouse.
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import { site, categorias } from '../data/site';
+import { capa, fotosDa } from '../lib/fotos';
 import { url } from '../lib/url';
 
-const atual = Astro.url.pathname.replace(/\/$/, '');
-const links = [
-  ...categorias.map((c) => ({ href: url(`/${c.slug}`), texto: c.titulo })),
-  { href: url('/sobre'), texto: 'Sobre' },
-  { href: url('/contato'), texto: 'Contato' },
+const eu = Object.values(
+  import.meta.glob<{ default: ImageMetadata }>('/src/assets/eu.{jpg,jpeg,png,webp}', { eager: true }),
+)[0]?.default;
+
+const itens = [
+  { href: url('/'), texto: 'Início', foto: capa()?.src },
+  ...categorias.map((c) => ({ href: url(`/${c.slug}`), texto: c.titulo, foto: fotosDa(c.slug)[0]?.src })),
+  { href: url('/sobre'), texto: 'Sobre', foto: eu },
+  { href: url('/contato'), texto: 'Contato', foto: undefined },
 ];
+
+const links = await Promise.all(
+  itens.map(async (item) => ({
+    ...item,
+    previa: item.foto ? (await getImage({ src: item.foto, width: 700, format: 'webp', quality: 75 })).src : undefined,
+  })),
+);
+
+const atual = Astro.url.pathname.replace(/\/$/, '');
+const { instagram, whatsapp, email } = site.contato;
 ---
 
 <header class="topo">
   <a class="marca" href={url('/')}>{site.nome}</a>
-  <button class="menu-botao" type="button" aria-expanded="false" aria-controls="menu">
-    <span></span><span></span>
+  <button class="gatilho" type="button" aria-expanded="false" aria-controls="menu" data-cursor="ABRIR">
+    <span class="gatilho-circulo" aria-hidden="true"></span>
+    <span class="gatilho-linha" aria-hidden="true"></span>
+    <span class="gatilho-linha" aria-hidden="true"></span>
     <span class="sr">Menu</span>
   </button>
-  <nav id="menu" class="menu">
-    {
-      links.map((link) => (
-        <a href={link.href} aria-current={atual === link.href ? 'page' : undefined}>
-          {link.texto}
-        </a>
-      ))
-    }
-  </nav>
 </header>
 
-<script>
-  const topo = document.querySelector('.topo')!;
-  const botao = topo.querySelector<HTMLButtonElement>('.menu-botao')!;
+<div id="menu" class="menu" aria-hidden="true">
+  <div class="menu-fundo"></div>
 
-  botao.addEventListener('click', () => {
-    const aberto = topo.classList.toggle('aberto');
-    botao.setAttribute('aria-expanded', String(aberto));
+  <div class="menu-conteudo container">
+    <nav class="menu-links">
+      {
+        links.map((link, i) => (
+          <div class="menu-item">
+            <a
+              class="menu-link"
+              href={link.href}
+              data-indice={i}
+              aria-current={atual === link.href.replace(/\/$/, '') ? 'page' : undefined}
+            >
+              <span class="menu-num">0{i + 1}</span>
+              <span class="menu-texto">{link.texto}</span>
+            </a>
+          </div>
+        ))
+      }
+    </nav>
+
+    <div class="menu-lado">
+      <div class="menu-previa" aria-hidden="true">
+        {links.map((link, i) => link.previa && <img src={link.previa} alt="" data-indice={i} loading="lazy" />)}
+      </div>
+      <div class="menu-contatos">
+        <a href={`https://instagram.com/${instagram}`} target="_blank" rel="noopener">Instagram</a>
+        <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener">WhatsApp</a>
+        <a href={`mailto:${email}`}>E-mail</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { gsap } from 'gsap';
+
+  const topo = document.querySelector<HTMLElement>('.topo')!;
+  const gatilho = topo.querySelector<HTMLButtonElement>('.gatilho')!;
+  const menu = document.querySelector<HTMLElement>('#menu')!;
+  const semMovimento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // O círculo nasce do botão, no canto de cima à direita
+  const origem = 'at calc(100% - 58px) 42px';
+  const abrir = gsap
+    .timeline({ paused: true })
+    .set(menu, { visibility: 'visible' })
+    .fromTo(
+      '.menu-fundo',
+      { clipPath: `circle(0% ${origem})` },
+      { clipPath: `circle(150% ${origem})`, duration: 0.9, ease: 'power3.inOut' },
+    )
+    .from('.menu-link', { yPercent: 110, duration: 1, ease: 'expo.out', stagger: 0.07 }, '-=0.35')
+    .from('.menu-lado', { autoAlpha: 0, y: 30, duration: 0.7, ease: 'power2.out' }, '<0.15');
+
+  if (semMovimento) abrir.duration(0.01);
+
+  let aberto = false;
+  function alternar(estado = !aberto) {
+    aberto = estado;
+    topo.classList.toggle('aberto', aberto);
+    gatilho.setAttribute('aria-expanded', String(aberto));
+    menu.setAttribute('aria-hidden', String(!aberto));
+    document.documentElement.style.overflow = aberto ? 'hidden' : '';
+    if (aberto) abrir.timeScale(1).play();
+    else abrir.timeScale(1.7).reverse();
+  }
+
+  gatilho.addEventListener('click', () => alternar());
+  addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && aberto) alternar(false);
   });
 
-  // Fundo escurece quando a página rola
-  const aoRolar = () => topo.classList.toggle('rolou', window.scrollY > 40);
-  window.addEventListener('scroll', aoRolar, { passive: true });
+  // Miniatura da foto ao passar o mouse em cada link
+  const previas = [...menu.querySelectorAll<HTMLImageElement>('.menu-previa img')];
+  menu.querySelectorAll<HTMLAnchorElement>('.menu-link').forEach((link) => {
+    link.addEventListener('mouseenter', () => {
+      previas.forEach((img) => img.classList.toggle('ativa', img.dataset.indice === link.dataset.indice));
+    });
+    // Link para a própria página ou âncora: só fecha o menu
+    link.addEventListener('click', () => alternar(false));
+  });
+
+  // Fundo do topo escurece quando a página rola
+  const aoRolar = () => topo.classList.toggle('rolou', scrollY > 40);
+  addEventListener('scroll', aoRolar, { passive: true });
   aoRolar();
 </script>
 
@@ -46,69 +133,84 @@ const links = [
   .topo {
     position: fixed;
     inset: 0 0 auto;
-    z-index: 50;
+    z-index: 60;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.25rem var(--margem);
-    background: linear-gradient(to bottom, rgb(0 0 0 / 0.6), transparent);
-    transition: background 0.4s, padding 0.4s;
+    padding: 1.1rem var(--margem);
+    background: linear-gradient(to bottom, rgb(0 0 0 / 0.55), transparent);
+    transition: background 0.4s;
   }
 
   .topo.rolou {
     background: rgb(11 10 15 / 0.85);
     backdrop-filter: blur(12px);
-    padding-block: 0.9rem;
+  }
+
+  .topo.aberto {
+    background: transparent;
+    backdrop-filter: none;
   }
 
   .marca {
     font-family: var(--fonte-titulo);
     font-size: 1.5rem;
     font-style: italic;
-    letter-spacing: 0.02em;
   }
 
-  .menu {
-    display: flex;
-    gap: 2rem;
-  }
-
-  .menu a {
+  /* Botão redondo com duas linhas que viram um X */
+  .gatilho {
     position: relative;
-    font-size: 0.75rem;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--texto-suave);
-    transition: color 0.3s;
-  }
-
-  .menu a:hover,
-  .menu a[aria-current='page'] {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 50%; /* o contorno de foco do teclado também fica redondo */
     color: var(--texto);
+    cursor: pointer;
   }
 
-  /* Linha roxa que "cresce" da esquerda ao passar o mouse */
-  .menu a::after {
-    content: '';
+  .gatilho-circulo {
     position: absolute;
-    left: 0;
-    right: 0.25em;
-    bottom: -6px;
-    height: 1px;
-    background: var(--destaque);
-    box-shadow: 0 0 8px var(--destaque);
-    scale: 0 1;
-    transform-origin: left;
-    transition: scale 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+    inset: 0;
+    border: 1px solid rgb(236 233 242 / 0.35);
+    border-radius: 50%;
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.3s, background 0.3s;
   }
 
-  .menu a:hover::after,
-  .menu a[aria-current='page']::after {
-    scale: 1 1;
+  @media (hover: hover) {
+    .gatilho:hover .gatilho-circulo {
+      transform: scale(1.15);
+      border-color: var(--destaque);
+      background: rgb(124 58 237 / 0.15);
+    }
   }
 
-  .menu-botao {
-    display: none;
+  .gatilho-linha {
+    grid-area: 1 / 1;
+    width: 22px;
+    height: 1.5px;
+    background: currentColor;
+    transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .gatilho-linha:nth-of-type(2) {
+    transform: translateY(-4px);
+  }
+
+  .gatilho-linha:nth-of-type(3) {
+    transform: translateY(4px);
+  }
+
+  .aberto .gatilho-linha:nth-of-type(2) {
+    transform: rotate(45deg);
+  }
+
+  .aberto .gatilho-linha:nth-of-type(3) {
+    transform: rotate(-45deg);
   }
 
   .sr {
@@ -119,57 +221,147 @@ const links = [
     clip-path: inset(50%);
   }
 
-  @media (max-width: 760px) {
-    .menu-botao {
-      display: grid;
-      gap: 6px;
-      padding: 10px 4px;
-      background: none;
-      border: 0;
-      cursor: pointer;
-      z-index: 2;
+  /* ---------- Menu em tela cheia ---------- */
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    visibility: hidden;
+  }
+
+  .menu-fundo {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 80% 20%, rgb(124 58 237 / 0.35), transparent 55%),
+      var(--fundo);
+    clip-path: circle(0% at calc(100% - 58px) 42px);
+  }
+
+  .menu-conteudo {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    align-items: center;
+    gap: 4rem;
+    height: 100%;
+    padding-block: 110px 60px;
+  }
+
+  .menu-item {
+    overflow: hidden; /* esconde o link enquanto ele "sobe" */
+  }
+
+  .menu-link {
+    display: flex;
+    align-items: baseline;
+    gap: 1.2rem;
+    padding-block: 0.15em;
+    font-family: var(--fonte-texto);
+    font-weight: 800;
+    font-size: clamp(2.4rem, 6.5vw, 5.6rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    color: var(--texto);
+    transition: color 0.3s;
+  }
+
+  .menu-num {
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    color: var(--destaque);
+  }
+
+  .menu-texto {
+    position: relative;
+    isolation: isolate; /* deixa o marca-texto (::after) atrás só do texto */
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  /* Os outros links apagam quando um está em foco */
+  .menu-links:hover .menu-link {
+    color: rgb(236 233 242 / 0.3);
+  }
+
+  .menu-links .menu-link:hover,
+  .menu-link[aria-current='page'] {
+    color: var(--texto);
+  }
+
+  .menu-link:hover .menu-texto {
+    transform: translateX(18px);
+  }
+
+  .menu-link[aria-current='page'] .menu-texto::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.08em;
+    height: 0.18em;
+    background: var(--destaque-forte);
+    z-index: -1;
+  }
+
+  .menu-lado {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  .menu-previa {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    max-height: 56vh;
+    overflow: hidden;
+    background: var(--fundo-2);
+    box-shadow: 0 0 60px rgb(124 58 237 / 0.25);
+  }
+
+  .menu-previa img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.12);
+    transition: opacity 0.5s, transform 1s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .menu-previa img.ativa {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .menu-contatos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+
+  .menu-contatos a {
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+    transition: color 0.3s;
+  }
+
+  .menu-contatos a:hover {
+    color: var(--destaque);
+  }
+
+  @media (max-width: 860px) {
+    .menu-conteudo {
+      grid-template-columns: 1fr;
+      align-content: center;
+      gap: 3rem;
     }
 
-    .menu-botao span:not(.sr) {
-      display: block;
-      width: 26px;
-      height: 1px;
-      background: var(--texto);
-      transition: transform 0.3s;
-    }
-
-    .aberto .menu-botao span:first-child {
-      transform: translateY(3.5px) rotate(45deg);
-    }
-
-    .aberto .menu-botao span:nth-child(2) {
-      transform: translateY(-3.5px) rotate(-45deg);
-    }
-
-    .menu {
-      position: fixed;
-      inset: 0;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 2.2rem;
-      background: var(--fundo);
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s, visibility 0.3s;
-    }
-
-    .aberto .menu {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .menu a {
-      font-family: var(--fonte-titulo);
-      font-size: 2.2rem;
-      font-style: italic;
-      letter-spacing: 0;
-      text-transform: none;
+    .menu-previa {
+      display: none;
     }
   }
 </style>

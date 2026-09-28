@@ -1,0 +1,250 @@
+---
+// Slider principal (inspirado no "T.RICKS Slider"): arrasta com o mouse ou o dedo,
+// roda em loop e deixa a foto do centro em destaque. Usa a biblioteca Splide.
+import { Image } from 'astro:assets';
+import type { Foto } from '../lib/fotos';
+import { categorias } from '../data/site';
+import { url } from '../lib/url';
+
+interface Props {
+  fotos: Foto[];
+}
+
+const { fotos } = Astro.props;
+const tituloDa = (slug: string) => categorias.find((c) => c.slug === slug)?.titulo ?? slug;
+---
+
+<section class="destaques" aria-label="Fotos em destaque">
+  <div class="splide" data-cursor="ARRASTE">
+    <div class="splide__track">
+      <ul class="splide__list">
+        {
+          fotos.map((foto, i) => (
+            <li class="splide__slide">
+              <a class="slide" href={url(`/${foto.categoria}`)} draggable="false">
+                <div class="slide-foto">
+                  <Image
+                    src={foto.src}
+                    alt={foto.alt}
+                    widths={[500, 800, 1100]}
+                    sizes="(max-width: 767px) 80vw, 34vw"
+                    format="webp"
+                    quality={80}
+                    loading={i < 4 ? 'eager' : 'lazy'}
+                    draggable="false"
+                  />
+                </div>
+                <div class="slide-legenda">
+                  <span class="slide-num">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="slide-titulo">{foto.alt}</span>
+                  <span class="slide-categoria">{tituloDa(foto.categoria)}</span>
+                </div>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  <div class="controles container">
+    <button class="controle anterior" type="button" aria-label="Foto anterior">
+      <span class="controle-fundo"></span><span class="controle-seta">←</span>
+    </button>
+    <span class="contador"><b class="contador-atual">01</b> / {String(fotos.length).padStart(2, '0')}</span>
+    <button class="controle proxima" type="button" aria-label="Próxima foto">
+      <span class="controle-fundo"></span><span class="controle-seta">→</span>
+    </button>
+  </div>
+</section>
+
+<script>
+  import Splide from '@splidejs/splide';
+  import '@splidejs/splide/css/core';
+
+  const raiz = document.querySelector<HTMLElement>('.destaques .splide');
+  if (raiz) {
+    const slider = new Splide(raiz, {
+      type: 'loop',
+      perPage: 3,
+      perMove: 1,
+      focus: 'center',
+      gap: '2.2vw',
+      arrows: false,
+      pagination: false,
+      speed: 900,
+      easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)',
+      dragMinThreshold: { mouse: 8, touch: 12 },
+      breakpoints: {
+        767: { perPage: 1, padding: '12%', gap: '4vw' },
+      },
+    }).mount();
+
+    const secao = raiz.closest('.destaques')!;
+    const atual = secao.querySelector('.contador-atual')!;
+    slider.on('move', (indice) => {
+      atual.textContent = String(indice + 1).padStart(2, '0');
+    });
+
+    secao.querySelector('.anterior')!.addEventListener('click', () => slider.go('<'));
+    secao.querySelector('.proxima')!.addEventListener('click', () => slider.go('>'));
+  }
+</script>
+
+<style>
+  .destaques {
+    padding-top: clamp(64px, 12vh, 130px);
+    overflow: hidden;
+  }
+
+  .splide {
+    cursor: grab;
+  }
+
+  .splide:active {
+    cursor: grabbing;
+  }
+
+  .slide {
+    display: block;
+    user-select: none;
+  }
+
+  .slide-foto {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: var(--fundo-2);
+  }
+
+  .slide-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  /* Fotos das pontas ficam menores e apagadas; a do centro cresce */
+  .splide__slide .slide-foto {
+    transform: scale(0.84);
+    filter: grayscale(0.7) brightness(0.55);
+    transition:
+      transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1),
+      filter 0.9s;
+  }
+
+  .splide__slide.is-active .slide-foto {
+    transform: scale(1);
+    filter: none;
+    box-shadow: 0 30px 80px rgb(0 0 0 / 0.6), 0 0 60px rgb(124 58 237 / 0.25);
+  }
+
+  .slide-legenda {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    margin-top: 1.1rem;
+    opacity: 0;
+    translate: 0 12px;
+    transition: opacity 0.6s, translate 0.6s;
+  }
+
+  /* .splide__slide na frente: o Splide também põe "is-active" no slider inteiro */
+  .splide__slide.is-active .slide-legenda {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  .slide-num {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    color: var(--destaque);
+  }
+
+  .slide-titulo {
+    font-family: var(--fonte-titulo);
+    font-style: italic;
+    font-size: 1.5rem;
+    text-transform: lowercase;
+  }
+
+  .slide-categoria {
+    margin-left: auto;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+  }
+
+  /* Setas redondas que "enchem" de roxo no hover */
+  .controles {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.6rem;
+    margin-top: 2.5rem;
+  }
+
+  .controle {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    padding: 0;
+    border: 1px solid rgb(236 233 242 / 0.35);
+    border-radius: 50%;
+    background: none;
+    color: var(--texto);
+    font-size: 1.1rem;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .controle-fundo {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--destaque-forte);
+    transform: scale(0);
+    transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @media (hover: hover) {
+    .controle:hover .controle-fundo {
+      transform: scale(1);
+    }
+  }
+
+  .controle-seta {
+    position: relative;
+    transition: translate 0.3s;
+  }
+
+  .anterior:hover .controle-seta {
+    translate: -3px 0;
+  }
+
+  .proxima:hover .controle-seta {
+    translate: 3px 0;
+  }
+
+  .contador {
+    min-width: 5.5rem;
+    text-align: center;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--texto-suave);
+  }
+
+  .contador b {
+    font-weight: 400;
+    color: var(--texto);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .splide__slide .slide-foto,
+    .slide-legenda {
+      transition: none;
+    }
+  }
+</style>

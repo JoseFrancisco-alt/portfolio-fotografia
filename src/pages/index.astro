@@ -1,9 +1,9 @@
 ---
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import Galeria from '../components/Galeria.astro';
-import { site, categorias, criacaoDeSites } from '../data/site';
-import { capa, fotosDa, selecionadas } from '../lib/fotos';
+import Destaques from '../components/Destaques.astro';
+import { site, categorias, criacaoDeSites, destaques } from '../data/site';
+import { capa, fotosDa, fotosEmDestaque } from '../lib/fotos';
 import { url } from '../lib/url';
 
 const fotoCapa = capa();
@@ -53,6 +53,15 @@ const linkSite = `https://wa.me/${site.contato.whatsapp}?text=${encodeURICompone
     </div>
   </section>
 
+  <Destaques fotos={fotosEmDestaque(destaques)} />
+
+  <!-- Faixa de texto que corre para o lado com a rolagem (ScrollTrigger) -->
+  <div class="faixa" aria-hidden="true">
+    <p class="faixa-texto">
+      {Array.from({ length: 4 }, () => categorias.map((c) => <span>{c.titulo} <i>✦</i> </span>))}
+    </p>
+  </div>
+
   <section id="ensaios" class="container secao">
     <p class="rotulo">Ensaios</p>
     <div class="ensaios">
@@ -75,11 +84,6 @@ const linkSite = `https://wa.me/${site.contato.whatsapp}?text=${encodeURICompone
         ))
       }
     </div>
-  </section>
-
-  <section class="container secao">
-    <p class="rotulo">Selecionadas</p>
-    <Galeria fotos={selecionadas()} />
   </section>
 
   <section class="container chamada revelar">
@@ -214,11 +218,42 @@ const linkSite = `https://wa.me/${site.contato.whatsapp}?text=${encodeURICompone
     font-style: italic;
     background: linear-gradient(transparent 62%, rgb(124 58 237 / 0.85) 62%, rgb(124 58 237 / 0.85) 90%, transparent 90%)
       no-repeat;
-    background-size: 0% 100%;
-    animation: marcar 1s 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+    background-size: 100% 100%; /* fora da capa, o Rolagem.astro anima isso ao rolar */
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
     padding-inline: 0.05em;
+  }
+
+  .hero .marca-texto {
+    background-size: 0% 100%;
+    animation: marcar 1s 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  }
+
+  /* ---------- FAIXA DE TEXTO ---------- */
+  .faixa {
+    overflow: hidden;
+    padding-block: clamp(56px, 10vh, 110px) 0;
+  }
+
+  .faixa-texto {
+    margin: 0;
+    white-space: nowrap;
+    font-family: var(--fonte-texto);
+    font-weight: 800;
+    font-size: clamp(3.5rem, 11vw, 10rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(236 233 242 / 0.25);
+  }
+
+  .faixa-texto i {
+    font-style: normal;
+    font-size: 0.4em;
+    vertical-align: middle;
+    color: var(--destaque);
+    -webkit-text-stroke: 0;
   }
 
   .hero-assinatura {
@@ -362,13 +397,6 @@ const linkSite = `https://wa.me/${site.contato.whatsapp}?text=${encodeURICompone
 
   .chamada h2 {
     font-size: clamp(2.6rem, 7vw, 5rem);
-  }
-
-  .chamada .marca-texto {
-    animation-timeline: view();
-    animation-range: entry 40% cover 45%;
-    animation-delay: 0s;
-    animation-duration: auto;
   }
 
   .chamada p {
@@ -579,7 +607,7 @@ const linkSite = `https://wa.me/${site.contato.whatsapp}?text=${encodeURICompone
       animation: none;
     }
 
-    .marca-texto {
+    .hero .marca-texto {
       animation: none;
       background-size: 100% 100%;
     }

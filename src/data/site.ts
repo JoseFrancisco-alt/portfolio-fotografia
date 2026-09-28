@@ -22,6 +22,10 @@ export const site = {
   },
 };
 
+// Fotos do slider principal da home, na ordem em que aparecem.
+// Formato: 'categoria/nome-do-arquivo' (sem o .jpg). Lista vazia = escolha automática.
+export const destaques: string[] = [];
+
 // Divulgação: você também cria sites de portfólio para outras pessoas.
 // Aparece como uma seção na home (não é o foco do site) e na página de contato.
 export const criacaoDeSites = {

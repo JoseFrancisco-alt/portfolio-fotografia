@@ -1,0 +1,127 @@
+---
+// Cursor personalizado: um ponto + um anel que segue o mouse com atraso.
+// Qualquer elemento com data-cursor="TEXTO" faz o anel crescer e mostrar o texto.
+// Só liga em computador (no celular não existe mouse).
+---
+
+<div class="cursor" aria-hidden="true">
+  <div class="cursor-anel"><span class="cursor-texto"></span></div>
+  <div class="cursor-ponto"></div>
+</div>
+
+<script>
+  import { gsap } from 'gsap';
+
+  const temMouse = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const cursor = document.querySelector<HTMLElement>('.cursor')!;
+
+  if (temMouse) {
+    const anel = cursor.querySelector<HTMLElement>('.cursor-anel')!;
+    const ponto = cursor.querySelector<HTMLElement>('.cursor-ponto')!;
+    const texto = cursor.querySelector<HTMLElement>('.cursor-texto')!;
+
+    // quickTo = jeito rápido do GSAP de seguir um valor que muda o tempo todo
+    const anelX = gsap.quickTo(anel, 'x', { duration: 0.5, ease: 'power3' });
+    const anelY = gsap.quickTo(anel, 'y', { duration: 0.5, ease: 'power3' });
+    const pontoX = gsap.quickTo(ponto, 'x', { duration: 0.1 });
+    const pontoY = gsap.quickTo(ponto, 'y', { duration: 0.1 });
+
+    addEventListener('pointermove', (e) => {
+      cursor.classList.add('visivel');
+      anelX(e.clientX);
+      anelY(e.clientY);
+      pontoX(e.clientX);
+      pontoY(e.clientY);
+    });
+
+    document.documentElement.addEventListener('pointerleave', () => cursor.classList.remove('visivel'));
+
+    // Links e botões deixam o anel um pouco maior
+    addEventListener('pointerover', (e) => {
+      const alvo = (e.target as Element).closest<HTMLElement>('[data-cursor], a, button');
+      const rotulo = alvo?.dataset.cursor ?? '';
+      cursor.classList.toggle('grande', Boolean(rotulo));
+      cursor.classList.toggle('hover', Boolean(alvo) && !rotulo);
+      texto.textContent = rotulo;
+    });
+  } else {
+    cursor.remove();
+  }
+</script>
+
+<style>
+  .cursor {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .cursor.visivel {
+    opacity: 1;
+  }
+
+  .cursor-anel,
+  .cursor-ponto {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+  }
+
+  .cursor-ponto {
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 -3px;
+    background: var(--destaque);
+  }
+
+  .cursor-anel {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    margin: -18px 0 0 -18px;
+    border: 1px solid rgb(236 233 242 / 0.5);
+    transition:
+      width 0.4s cubic-bezier(0.2, 0.7, 0.2, 1),
+      height 0.4s cubic-bezier(0.2, 0.7, 0.2, 1),
+      margin 0.4s cubic-bezier(0.2, 0.7, 0.2, 1),
+      background 0.3s,
+      border-color 0.3s;
+  }
+
+  .hover .cursor-anel {
+    width: 56px;
+    height: 56px;
+    margin: -28px 0 0 -28px;
+    border-color: var(--destaque);
+  }
+
+  .grande .cursor-anel {
+    width: 92px;
+    height: 92px;
+    margin: -46px 0 0 -46px;
+    background: var(--destaque-forte);
+    border-color: var(--destaque-forte);
+  }
+
+  .grande .cursor-ponto {
+    opacity: 0;
+  }
+
+  .cursor-texto {
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--texto);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .grande .cursor-texto {
+    opacity: 1;
+  }
+</style>

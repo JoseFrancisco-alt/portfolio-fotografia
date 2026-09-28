@@ -47,6 +47,14 @@ export function selecionadas(limite = 12) {
   return misturadas.slice(0, limite);
 }
 
+// Fotos do slider: as da lista (ex.: 'rua/02-noite-de-festa') ou, se vazia, uma seleção automática.
+export function fotosEmDestaque(lista: string[], limite = 10) {
+  if (lista.length === 0) return selecionadas(limite);
+  return lista
+    .map((chave) => fotos.find((f) => `${f.categoria}/${f.nome}` === chave))
+    .filter((f): f is Foto => Boolean(f));
+}
+
 // Foto de capa: qualquer arquivo com nome começando em "capa", senão a primeira paisagem.
 export function capa() {
   return (

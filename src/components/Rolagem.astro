@@ -1,0 +1,85 @@
+---
+// Animações ligadas à rolagem da página (GSAP ScrollTrigger).
+//  - .revelar         → aparece ao entrar na tela (fotos abrem como cortina, textos sobem)
+//  - capa da home     → foto, bloco roxo e texto andam em velocidades diferentes (scrub)
+//  - .faixa-texto     → faixa de texto que corre para o lado conforme você rola
+//  - .marca-texto     → o marca-texto roxo "pinta" quando a frase aparece
+---
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const semMovimento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!semMovimento) {
+    // 1) Revelar ao entrar na tela, em grupos (batch) para as galerias entrarem em cascata.
+    //    Elementos com inclinação 3D (data-tilt) usam clip-path, para não brigar com o transform.
+    const comTilt = gsap.utils.toArray<HTMLElement>('.revelar[data-tilt]');
+    const semTilt = gsap.utils.toArray<HTMLElement>('.revelar:not([data-tilt])');
+
+    gsap.set(comTilt, { clipPath: 'inset(100% 0% 0% 0%)' });
+    ScrollTrigger.batch(comTilt, {
+      start: 'top 90%',
+      once: true,
+      onEnter: (lote) =>
+        gsap.to(lote, {
+          clipPath: 'inset(0% 0% 0% 0%)',
+          duration: 1.3,
+          ease: 'expo.out',
+          stagger: 0.12,
+          clearProps: 'clipPath',
+        }),
+    });
+
+    gsap.set(semTilt, { autoAlpha: 0, y: 50 });
+    ScrollTrigger.batch(semTilt, {
+      start: 'top 88%',
+      once: true,
+      onEnter: (lote) =>
+        gsap.to(lote, { autoAlpha: 1, y: 0, duration: 1.1, ease: 'power3.out', stagger: 0.12 }),
+    });
+
+    // 2) Capa da home em camadas enquanto você rola para baixo
+    const hero = document.querySelector('.hero');
+    if (hero) {
+      const rolagem = { trigger: hero, start: 'top top', end: 'bottom top', scrub: true };
+      gsap.to('.hero-moldura', { yPercent: 18, scale: 1.04, ease: 'none', scrollTrigger: rolagem });
+      gsap.to('.hero-bloco', { yPercent: -35, rotate: -4, ease: 'none', scrollTrigger: rolagem });
+      gsap.to('.hero-texto', { yPercent: -30, autoAlpha: 0, ease: 'none', scrollTrigger: rolagem });
+    }
+
+    // 3) Faixas de texto que correm para o lado
+    gsap.utils.toArray<HTMLElement>('.faixa-texto').forEach((faixa) => {
+      const direcao = faixa.dataset.direcao === 'direita' ? 1 : -1;
+      gsap.fromTo(
+        faixa,
+        { xPercent: direcao > 0 ? -25 : 0 },
+        {
+          xPercent: direcao > 0 ? 0 : -25,
+          ease: 'none',
+          scrollTrigger: { trigger: faixa, start: 'top bottom', end: 'bottom top', scrub: 0.6 },
+        },
+      );
+    });
+
+    // 4) Marca-texto que pinta quando a frase entra na tela (fora da capa, que já anima sozinha)
+    gsap.utils.toArray<HTMLElement>('.marca-texto:not(.hero .marca-texto)').forEach((marca) => {
+      gsap.fromTo(
+        marca,
+        { backgroundSize: '0% 100%' },
+        {
+          backgroundSize: '100% 100%',
+          duration: 1,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: marca, start: 'top 85%', once: true },
+        },
+      );
+    });
+
+    // Recalcula as posições depois que as fotos terminam de carregar
+    addEventListener('load', () => ScrollTrigger.refresh());
+  }
+</script>
