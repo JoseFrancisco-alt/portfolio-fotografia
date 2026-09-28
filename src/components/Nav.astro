@@ -26,11 +26,24 @@ const links = await Promise.all(
 );
 
 const atual = Astro.url.pathname.replace(/\/$/, '');
+const naHome = atual === url('/').replace(/\/$/, '');
 const { instagram, whatsapp, email } = site.contato;
 ---
 
 <header class="topo">
-  <a class="marca" href={url('/')}>{site.nome}</a>
+  <div class="topo-esquerda">
+    {
+      !naHome && (
+        <a class="voltar" href={url('/')} aria-label="Voltar">
+          <span class="voltar-fundo" aria-hidden="true" />
+          <svg class="voltar-seta" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M19 12H5M11 6l-6 6 6 6" />
+          </svg>
+        </a>
+      )
+    }
+    <a class="marca" href={url('/')}>{site.nome}</a>
+  </div>
   <button class="gatilho" type="button" aria-expanded="false" aria-controls="menu" data-cursor="ABRIR">
     <span class="gatilho-circulo" aria-hidden="true"></span>
     <span class="gatilho-linha" aria-hidden="true"></span>
@@ -109,6 +122,15 @@ const { instagram, whatsapp, email } = site.contato;
   }
 
   gatilho.addEventListener('click', () => alternar());
+
+  // Seta de voltar: volta para a página anterior do site; se entrou direto pelo link, vai para o início
+  topo.querySelector<HTMLAnchorElement>('.voltar')?.addEventListener('click', (e) => {
+    const veioDoSite = document.referrer.startsWith(location.origin);
+    if (veioDoSite && history.length > 1) {
+      e.preventDefault();
+      history.back();
+    }
+  });
   addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && aberto) alternar(false);
   });
@@ -156,6 +178,66 @@ const { instagram, whatsapp, email } = site.contato;
     font-family: var(--fonte-titulo);
     font-size: 1.5rem;
     font-style: italic;
+  }
+
+  .topo-esquerda {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* Seta de voltar: círculo que enche de roxo e seta que "puxa" para a esquerda */
+  .voltar {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgb(236 233 242 / 0.35);
+    border-radius: 50%;
+    overflow: hidden;
+    color: var(--texto);
+    transition: border-color 0.3s;
+  }
+
+  .voltar-fundo {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--destaque-forte);
+    transform: scale(0);
+    transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .voltar-seta {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: translate 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @media (hover: hover) {
+    .voltar:hover {
+      border-color: var(--destaque-forte);
+    }
+
+    .voltar:hover .voltar-fundo {
+      transform: scale(1);
+    }
+
+    .voltar:hover .voltar-seta {
+      translate: -3px 0;
+    }
+  }
+
+  .aberto .voltar {
+    opacity: 0;
+    pointer-events: none;
   }
 
   /* Botão redondo com duas linhas que viram um X */
