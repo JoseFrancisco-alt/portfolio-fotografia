@@ -168,7 +168,7 @@ const fotoDisplay = foto ? (await getImage({ src: foto.src, width: 1400, format:
     height: 100vh;
     height: 100svh;
     overflow: hidden;
-    background: radial-gradient(ellipse at 50% 55%, rgb(124 58 237 / 0.22), transparent 60%);
+    background: radial-gradient(ellipse at 50% 55%, rgb(var(--brilho) / 0.22), transparent 60%);
   }
 
   .ativa .camera-slider {

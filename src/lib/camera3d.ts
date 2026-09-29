@@ -128,8 +128,9 @@ function cobrir(t: THREE.Texture, proporcao: number) {
     t.repeat.set(proporcao / da, 1);
     t.offset.set((1 - proporcao / da) / 2, 0);
   } else {
+    // foto em pé: mostra um pouco mais da parte de baixo (na "wonder why", da cabeça até a camiseta)
     t.repeat.set(1, da / proporcao);
-    t.offset.set(0, (1 - da / proporcao) / 2);
+    t.offset.set(0, (1 - da / proporcao) * 0.3);
   }
 }
 
@@ -148,17 +149,17 @@ export async function montarCamera(tela: HTMLCanvasElement, fotoUrl?: string): P
 
   const olho = new THREE.PerspectiveCamera(FOV, 1, 0.05, 100);
 
-  // Luz: principal suave, contorno laranja (como na referência) e contorno roxo do site
-  cena.add(new THREE.HemisphereLight(0xb9b3d6, 0x0a0910, 0.35));
+  // Luz: principal suave, contorno laranja (como na referência) e contorno azul do site
+  cena.add(new THREE.HemisphereLight(0xa9bbd6, 0x03060d, 0.32));
   const principal = new THREE.DirectionalLight(0xffffff, 1.6);
   principal.position.set(3, 5, 7);
   const laranja = new THREE.DirectionalLight(0xff8a5c, 4);
   laranja.position.set(-6, 3, -3);
-  const roxo = new THREE.DirectionalLight(0x8b5cf6, 1.6);
-  roxo.position.set(6, -2, -2);
+  const azul = new THREE.DirectionalLight(0x2a64c8, 1.5);
+  azul.position.set(6, -2, -2);
   const frontal = new THREE.DirectionalLight(0xffe2cc, 0.8);
   frontal.position.set(-2, 1, 6);
-  cena.add(principal, laranja, roxo, frontal);
+  cena.add(principal, laranja, azul, frontal);
 
   // ---------- materiais ----------
   const couro = ruido(256, 90);
@@ -171,7 +172,7 @@ export async function montarCamera(tela: HTMLCanvasElement, fotoUrl?: string): P
   const brilho = new THREE.MeshStandardMaterial({ color: 0x050506, roughness: 0.12, metalness: 0.4 });
   const vermelho = new THREE.MeshStandardMaterial({ color: 0xd4202a, roughness: 0.35, emissive: 0x3a0508 });
   const vidro = new THREE.MeshPhysicalMaterial({
-    color: 0x1a1236,
+    color: 0x081329,
     roughness: 0.04,
     metalness: 0.1,
     clearcoat: 1,
@@ -393,7 +394,7 @@ export async function montarCamera(tela: HTMLCanvasElement, fotoUrl?: string): P
   lenteVidro.rotation.x = Math.PI / 2;
   lenteVidro.position.z = 2.02 - R * Math.cos(abertura);
   noEixo(lenteVidro);
-  const reflexo = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.012, 8, 64), new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.6 }));
+  const reflexo = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.012, 8, 64), new THREE.MeshBasicMaterial({ color: 0x3d7fd6, transparent: true, opacity: 0.55 }));
   reflexo.position.z = 2.0;
   noEixo(reflexo);
 

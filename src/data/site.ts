@@ -5,10 +5,10 @@ export const site = {
   apelido: 'Ávila', // como o pessoal te chama (aparece no "Olá, eu sou...")
   descricao: 'Fotografia de paisagem, retrato e rua.',
   cidade: 'Maceió, Brasil',
-  // Frase grande da capa. "destaque" ganha o marca-texto roxo.
+  // Frase grande da capa. "destaque" ganha o marca-texto azul.
   frase: {
-    inicio: 'Fotografias que guardam',
-    destaque: 'o que o olho sente.',
+    inicio: 'O mundo',
+    destaque: 'pelas minhas lentes.',
   },
   bio: [
     'Tô começando na fotografia e pronto pra tirar os melhores cliques: registrar o seu lifestyle, os seus rolês, as pessoas que você ama e muito mais.',
@@ -29,9 +29,9 @@ export const capaPrincipal = 'paisagem/01-sol-sobre-a-baia';
 // a primeira também aparece no display da câmera 3D).
 // Formato: 'categoria/nome-do-arquivo' (sem o .jpg). Lista vazia = escolha automática.
 export const destaques: string[] = [
+  'retrato/09-wonder-why', // primeira: aparece no display da câmera
   'rua/02-noite-de-festa',
   'rua/03-luzes-da-praca',
-  'retrato/09-wonder-why',
   'retrato/02-olhando-a-cidade',
   'retrato/10-perfil-na-noite',
   'rua/06-bolsa-na-pedra',
